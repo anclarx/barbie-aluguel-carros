@@ -26,8 +26,8 @@ const textosSituacao: Record<Situacao, string> = {
 };
 
 const podeEditar = (s: StatusPedido) => s === "EM_ANALISE_FINANCEIRA" || s === "APROVADO";
-// O design também mostra "Cancelar" em contrato em execução; regra a confirmar com o professor (guia, US06).
-const podeCancelar = (s: StatusPedido) => podeEditar(s) || s === "CONTRATO_EM_EXECUCAO";
+// Mesma regra da API (StatusPedido.MODIFICAVEIS): contrato em execução não se cancela (US06).
+const podeCancelar = podeEditar;
 
 type Acoes = { onDetalhes: () => void; onEditar: () => void; onCancelar: () => void; onEscolher: () => void };
 
