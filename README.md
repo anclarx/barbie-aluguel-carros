@@ -14,7 +14,7 @@
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-ff3eb5?logo=supabase&logoColor=white)
 ![Versão](https://img.shields.io/badge/versão-1.0.0-fe64c3)
 
-[Sobre](#-sobre-o-projeto) · [Funcionalidades](#-funcionalidades-principais) · [Tecnologias](#-tecnologias-utilizadas) · [Modelagem](#-modelagem-do-sistema) · [Arquitetura](#-arquitetura) · [Como rodar](#-instalação-e-execução) · [Demonstração](#-demonstração) · [Testes](#-testes)
+[Sobre](#-sobre-o-projeto) · [Demonstração](#-demonstração) · [Funcionalidades](#-funcionalidades-principais) · [Tecnologias](#-tecnologias-utilizadas) · [Modelagem](#-modelagem-do-sistema) · [Arquitetura](#-arquitetura) · [Como rodar](#-instalação-e-execução) · [Testes](#-testes)
 
 </div>
 
@@ -34,7 +34,9 @@ No PinkGo, o cliente monta o pedido pela vitrine, os **bancos parceiros responde
   que o GitHub gerar.
 -->
 
-https://github.com/user-attachments/assets/COLE-AQUI-O-LINK-DO-VIDEO
+
+https://github.com/user-attachments/assets/0f1b2c82-2115-4f25-a326-3bf2c56d0082
+
 
 🎞️ Em qualidade cheia: [docs/demonstracao/pinkgo-demo.mp4](docs/demonstracao/pinkgo-demo.mp4)
 
@@ -131,7 +133,7 @@ Na primeira subida, o Hibernate cria as tabelas e a carga inicial cria 4 lojas, 
 | 🧑‍💼 Agente  | `agente@pinkgo.com`  | `agente123` |
 
 <details>
-<summary>🌱 <b>Dados iniciais</b>: clientes, históricos de pedidos e agentes</summary>
+<summary>🌱 <b>Dados iniciais</b>: clientes, históricos de pedidos e agentes (clique para abrir)</summary>
 
 <br>
 
@@ -169,10 +171,14 @@ Para limpar, use o **SQL Editor** do Supabase. O `TRUNCATE` não tem como desfaz
     agentes, automoveis, modelo_fotos, modelos, locais, bancos RESTART IDENTITY CASCADE;
   ```
 
+Uploading pinkgo-demo-readme.mp4…
+
+
+
 </details>
 
 <details>
-<summary>🔑 <b>Variáveis de ambiente</b> do <code>backend/.env</code></summary>
+<summary>🔑 <b>Variáveis de ambiente</b> do <code>backend/.env</code> (clique para abrir)</summary>
 
 <br>
 
