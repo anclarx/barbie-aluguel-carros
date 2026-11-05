@@ -199,13 +199,13 @@ public class DataLoader implements ApplicationRunner {
 	private static List<Modelo> modelos() {
 		return List.of(
 				modelo("DreamMotors", "Pegasus Cabrio", 2024, "1000", "Câmbio automático", "Elétrico", 2, 2, "240 L",
-						"Conversível", "pegasus-cabrio-perola.png", "pegasus-cabrio-rose.jpg"),
+						"Conversível", "pegasus-cabrio-perola.png", "pegasus-cabrio-rose.png"),
 				modelo("Malibu Auto", "Sunset GT", 2023, "560", "Câmbio automático", "Flex", 2, 2, "300 L",
 						"Conversível", "sunset-gt-pink.png", "sunset-gt-roxo.png"),
 				modelo("Malibu Auto", "Lilac Spyder", 2021, "270", "Câmbio automático", "Flex", 2, 2, "300 L",
 						"Esportivo", "lilac-spyder-lilas.png", "lilac-spyder-ciano.png"),
 				modelo("Malibu Auto", "Coast 4x4", 2022, "420", "Câmbio manual", "Flex", 4, 2, "300 L", "SUV",
-						"coast-4x4-lilas.jpg", "coast-4x4-azul.png"),
+						"coast-4x4-lilas.png", "coast-4x4-azul.png"),
 				modelo("Malibu Auto", "Speedster Z", 2024, "630", "Câmbio automático", "Híbrido", 2, 2, "300 L",
 						"Conversível", "speedster-z-pink.png", "speedster-z-azul.png"),
 				modelo("Heritage Pink", "Sweet 57", 1957, "2300", "Câmbio manual", "Flex", 2, 2, "300 L", "Clássico",
@@ -217,15 +217,15 @@ public class DataLoader implements ApplicationRunner {
 				modelo("DreamMotors", "Baby Beetle", 2008, "180", "Câmbio manual", "Flex", 4, 2, "300 L", "Hatch",
 						"baby-beetle-azul.png", "baby-beetle-lavanda.png"),
 				modelo("DreamMotors", "Grand Vista", 2025, "1200", "Câmbio automático", "Híbrido", 5, 4, "650 L", "SUV",
-						"grand-vista-perola.jpg", "grand-vista-menta.jpg"),
+						"grand-vista-perola.png", "grand-vista-menta.png"),
 				modelo("Malibu Auto", "Ranch Pickup", 2020, "320", "Câmbio manual", "Flex", 2, 2, "900 L", "Picape",
-						"ranch-pickup-lilas.jpg", "ranch-pickup-azul.webp"),
+						"ranch-pickup-lilas.png", "ranch-pickup-azul.png"),
 				modelo("DreamMotors", "Aurora Roadster", 2025, "1800", "Câmbio automático", "Elétrico", 2, 2, "150 L",
-						"Conversível", "aurora-roadster-coral.jpg", "aurora-roadster-aqua.jpg"),
+						"Conversível", "aurora-roadster-coral.png", "aurora-roadster-aqua.png"),
 				modelo("Heritage Pink", "Bloom Mini", 2023, "190", "Câmbio automático", "Flex", 4, 2, "185 L", "Hatch",
-						"bloom-mini-rosa.jpg", "bloom-mini-azul.jpg"),
+						"bloom-mini-rosa.png", "bloom-mini-azul.png"),
 				modelo("Malibu Auto", "Petal Sport", 2023, "230", "Câmbio manual", "Flex", 5, 4, "300 L", "Hatch",
-						"petal-sport-coral.jpg", "petal-sport-menta.jpg"));
+						"petal-sport-coral.png", "petal-sport-menta.png"));
 	}
 
 	/** `fotos` são arquivos de `src/main/resources/imagens/carros`; a API monta a URL pública (veja ImagensConfig). */
