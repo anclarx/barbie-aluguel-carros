@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Vídeo bruto da demonstração (415 MB, sem cortes): fica só no PC
+docs/demonstracao/pinkgo-demo-original.mp4
+
+# Configurações locais do Claude Code
+.claude/
