@@ -12,7 +12,6 @@ const cores: Record<StatusPedido, string> = {
   CANCELADO: "bg-status-inactive-bg text-status-inactive-text",
 };
 
-/** Selo de status do pedido. `md` é o do cabeçalho dos modais de pedido. */
 export function StatusBadge({ status, tamanho = "sm" }: { status: StatusPedido; tamanho?: "sm" | "md" }) {
   return (
     <span
@@ -27,7 +26,6 @@ export function StatusBadge({ status, tamanho = "sm" }: { status: StatusPedido; 
   );
 }
 
-/** Etiqueta rosa (ex.: "Rendimento 1"). */
 export function Tag({ children }: { children: ReactNode }) {
   return (
     <span className="inline-flex w-fit items-center rounded-pill bg-brand-pink-soft px-12 py-4 text-caption-semibold text-brand-primary">
@@ -36,7 +34,6 @@ export function Tag({ children }: { children: ReactNode }) {
   );
 }
 
-/** Situação da análise de crédito em cada banco; NAO_ENVIADO é o banco que ainda não foi escolhido. */
 const propostas: Record<StatusProposta | "NAO_ENVIADO", { rotulo: string; cor: string }> = {
   EM_ANALISE: { rotulo: "Em análise", cor: "bg-status-warning-bg text-status-warning-text" },
   APROVADA: { rotulo: "Aprovado", cor: "bg-status-success-bg text-status-success-text" },

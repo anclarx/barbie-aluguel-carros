@@ -36,20 +36,13 @@ import br.pucminas.pinkgo.repository.LocalRepository;
 import br.pucminas.pinkgo.repository.ModeloRepository;
 import br.pucminas.pinkgo.repository.PedidoRepository;
 
-/**
- * Carga inicial (guia, seção 4): lojas e bancos quando o banco está vazio, o catálogo de modelos sempre igual à
- * lista daqui e os logins de teste (cliente e agentes) quando ainda não existem. Roda a cada subida sem duplicar nada.
- */
 @Component
 @Order(1)
 public class DataLoader implements ApplicationRunner {
 
-	/** Login do cliente de teste. */
 	public static final String EMAIL_TESTE = "cliente@pinkgo.dev";
 	public static final String SENHA_TESTE = "pinkgo123";
-	/** Login do agente de teste da PinkGo. */
 	public static final String EMAIL_AGENTE_EMPRESA = "agente@pinkgo.com";
-	/** Endereço anterior do mesmo agente; quem já tinha o banco populado tem o login trocado na subida. */
 	private static final String EMAIL_AGENTE_ANTIGO = "agente@pinkgo.dev";
 	public static final String SENHA_AGENTES = "agente123";
 
@@ -85,7 +78,6 @@ public class DataLoader implements ApplicationRunner {
 	@Override
 	@Transactional
 	public void run(ApplicationArguments args) {
-		// Cada parte confere o que já existe, então rodar de novo não duplica nada.
 		List<Local> locais = localRepository.count() == 0 ? criarLocais() : localRepository.findAll(Sort.by("id"));
 		sincronizarModelos(locais);
 		if (bancoRepository.count() == 0) criarBancos();
@@ -102,7 +94,6 @@ public class DataLoader implements ApplicationRunner {
 				new Local("Aldeota", "Fortaleza", "CE")));
 	}
 
-	/** Bancos parceiros fictícios; juros ao mês e entrada mínima em %. */
 	private void criarBancos() {
 		bancoRepository.saveAll(List.of(
 				new Banco("Banco Aurora", new BigDecimal("1.49"), 18, new BigDecimal("10")),
@@ -111,11 +102,6 @@ public class DataLoader implements ApplicationRunner {
 		log.info("Carga inicial: bancos parceiros criados.");
 	}
 
-	/**
-	 * O catálogo segue a lista de {@link #modelos()}, procurando cada modelo pelo nome: os que já existem recebem os
-	 * dados e as fotos atuais (assim, trocar uma foto aqui chega ao banco sem apagar pedidos), e os novos entram com
-	 * os seus automóveis.
-	 */
 	private void sincronizarModelos(List<Local> locais) {
 		List<Modelo> catalogo = modelos();
 		int novos = 0;
@@ -133,14 +119,9 @@ public class DataLoader implements ApplicationRunner {
 		if (novos > 0) log.info("Carga inicial: {} modelos novos, com {} automóveis cada.", novos, AUTOMOVEIS_POR_MODELO);
 	}
 
-	/**
-	 * Não há cadastro de agentes pelo site: o agente da PinkGo é fixo. Os bancos respondem sozinhos às propostas
-	 * (AnaliseCreditoService) e não têm login.
-	 */
 	private void criarAgentesDeTeste() {
 		removerAgentesDeBanco();
 		if (agenteRepository.existsByEmailIgnoreCase(EMAIL_AGENTE_EMPRESA)) return;
-		// O login fixo mudou de endereço: o agente antigo só troca de e-mail, sem criar outro.
 		var antigo = agenteRepository.findByEmailIgnoreCase(EMAIL_AGENTE_ANTIGO);
 		if (antigo.isPresent()) {
 			antigo.get().trocarEmail(EMAIL_AGENTE_EMPRESA);
@@ -151,10 +132,6 @@ public class DataLoader implements ApplicationRunner {
 		log.info("Agente de teste: {} / {}", EMAIL_AGENTE_EMPRESA, SENHA_AGENTES);
 	}
 
-	/**
-	 * Bancos com login ficaram no passado: bancos que já tinham a tabela `agentes` com as colunas `tipo` e `banco_id`
-	 * apagam os agentes de banco e as duas colunas. Num Supabase novo as colunas nem existem, e nada acontece.
-	 */
 	private void removerAgentesDeBanco() {
 		jdbc.execute("""
 				DO $$ BEGIN
@@ -167,7 +144,6 @@ public class DataLoader implements ApplicationRunner {
 		jdbc.execute("ALTER TABLE agentes DROP COLUMN IF EXISTS banco_id");
 	}
 
-	/** Cliente com dois rendimentos e um pedido com crédito, para "Meus aluguéis" não começar vazio. */
 	private void criarClienteDeTeste(List<Banco> bancos) {
 		Cliente cliente = new Cliente("Cliente de Teste", "52998224725", "123456789",
 				"Rua das Flores, 1989, Belo Horizonte - MG", "Designer", EMAIL_TESTE, passwordEncoder.encode(SENHA_TESTE));
@@ -180,7 +156,6 @@ public class DataLoader implements ApplicationRunner {
 		LocalDate hoje = LocalDate.now(clock);
 		LocalDate retirada = hoje.plusDays(10);
 		LocalDate entrega = hoje.plusDays(13);
-		// O primeiro carro livre nesses dias, respeitando a regra de disponibilidade.
 		automovelRepository.findAll(Sort.by("id")).stream()
 				.filter(a -> !pedidoRepository.automovelOcupado(a.getId(), retirada, entrega, 0L))
 				.findFirst()
@@ -192,10 +167,6 @@ public class DataLoader implements ApplicationRunner {
 				});
 	}
 
-	/**
-	 * Os modelos da vitrine, cada um com duas variações de cor (a primeira é a foto principal). A ordem importa: a
-	 * posição define as lojas e as placas dos automóveis, então modelos novos entram sempre no fim.
-	 */
 	private static List<Modelo> modelos() {
 		return List.of(
 				modelo("DreamMotors", "Pegasus Cabrio", 2024, "1000", "Câmbio automático", "Elétrico", 2, 2, "240 L",
@@ -228,7 +199,6 @@ public class DataLoader implements ApplicationRunner {
 						"petal-sport-coral.png", "petal-sport-menta.png"));
 	}
 
-	/** `fotos` são arquivos de `src/main/resources/imagens/carros`; a API monta a URL pública (veja ImagensConfig). */
 	private static Modelo modelo(String marca, String nome, int ano, String diaria, String cambio, String combustivel,
 			int assentos, int portas, String portaMalas, String carroceria, String... fotos) {
 		List<String> caminhos = Arrays.stream(fotos).map(f -> "carros/" + f).toList();
@@ -239,10 +209,6 @@ public class DataLoader implements ApplicationRunner {
 
 	private static final int AUTOMOVEIS_POR_MODELO = 4;
 
-	/**
-	 * Os automóveis do modelo na posição `i` do catálogo: duas lojas, com dois carros em cada, para a busca por loja
-	 * ter o que filtrar e um aluguel não esgotar o modelo na loja.
-	 */
 	private static List<Automovel> frota(int i, Modelo modelo, List<Local> locais) {
 		List<Automovel> frota = new ArrayList<>();
 		for (int j = 0; j < 2; j++) {

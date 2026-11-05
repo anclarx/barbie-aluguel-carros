@@ -19,10 +19,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * Pedido de crédito enviado a um banco para financiar o aluguel. O cliente pode escolher vários bancos e comparar;
- * os valores (entrada, parcela, juros) não ficam salvos, saem do SimuladorFinanciamento a partir do total do pedido.
- */
 @Entity
 @Table(name = "propostas_credito", uniqueConstraints = @UniqueConstraint(columnNames = { "pedido_id", "banco_id" }))
 @Getter
@@ -48,10 +44,8 @@ public class PropostaCredito {
 	@Column(nullable = false, length = 20)
 	private StatusProposta status = StatusProposta.EM_ANALISE;
 
-	/** Quando foi para o banco; o banco responde depois de um tempo (veja AnaliseCreditoService). */
 	private Instant enviadaEm;
 
-	/** Por que o banco aprovou ou negou, para o cliente e o agente entenderem a resposta. */
 	@Column(length = 200)
 	private String motivo;
 
@@ -62,7 +56,6 @@ public class PropostaCredito {
 		this.enviadaEm = Instant.now();
 	}
 
-	/** Mudar o parcelamento muda a proposta, então o banco precisa analisar de novo. */
 	void alterarParcelas(int novas) {
 		if (novas == parcelas) return;
 		parcelas = novas;
@@ -75,7 +68,6 @@ public class PropostaCredito {
 		enviadaEm = Instant.now();
 	}
 
-	/** Resposta do banco, pela política de crédito dele. Cada envio é respondido uma vez. */
 	public void responder(boolean aprovada, String motivo) {
 		if (status != StatusProposta.EM_ANALISE)
 			throw new RegraDeNegocioException("Esta proposta já foi respondida pelo banco.");
@@ -83,7 +75,6 @@ public class PropostaCredito {
 		this.motivo = motivo;
 	}
 
-	/** É a proposta que o cliente escolheu para financiar o aluguel. */
 	public boolean escolhida() {
 		return banco.getNome().equals(pedido.getBancoAssociado());
 	}

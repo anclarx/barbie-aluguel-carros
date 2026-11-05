@@ -1,6 +1,5 @@
 package br.pucminas.pinkgo.exception;
 
-/** Regra do domínio violada (HTTP 422). `campo` liga o erro a um campo do formulário, quando faz sentido. */
 public class RegraDeNegocioException extends RuntimeException {
 
 	private final String campo;

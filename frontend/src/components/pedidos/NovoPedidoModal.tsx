@@ -14,17 +14,13 @@ import { ResumoAluguel } from "./ResumoAluguel";
 import { SecaoLiquidacao, SecaoLocalPeriodo, SecaoModelo } from "./SecoesPedido";
 
 type Props = {
-  /** Carro escolhido no "Alugar" da vitrine; sem ele o modal fica fechado. */
   modelo: Modelo | null;
-  /** Lojas e datas já escolhidas na busca da Início. */
   busca?: Busca | null;
-  /** Escolhas de antes do login, quando o pedido foi começado sem conta; valem mais que a busca. */
   inicial?: ValoresPedido | null;
   onClose: () => void;
   onCriado: (pedido: Pedido) => void;
 };
 
-/** Modal "Novo pedido · Período e forma de liquidação" (US03). */
 export function NovoPedidoModal({ modelo, busca, inicial, onClose, onCriado }: Props) {
   if (!modelo) return null;
   return (
@@ -60,7 +56,6 @@ function Conteudo({ modelo, busca, inicial, onClose, onCriado }: ConteudoProps) 
   const [erro, setErro] = useState("");
   const [enviando, setEnviando] = useState(false);
 
-  /** Sem conta, o pedido fica guardado e a pessoa entra ou se cadastra; depois a Início reabre este modal. */
   const irParaConta = (destino: "/login" | "/cadastro") => {
     guardarPedidoPendente({ modelo, valores: form.valores });
     navigate(destino, { state: { from: "/" } });

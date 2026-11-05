@@ -32,10 +32,6 @@ import br.pucminas.pinkgo.security.JwtProperties;
 import br.pucminas.pinkgo.security.Papel;
 import br.pucminas.pinkgo.security.UsuarioJwtConverter;
 
-/**
- * API stateless com JWT: o login devolve o token e as rotas protegidas o leem do header Authorization. Sem sessão,
- * CSRF não se aplica.
- */
 @Configuration
 public class SecurityConfig {
 
@@ -55,9 +51,7 @@ public class SecurityConfig {
 								"/api/tipos-rendimento", "/api/enderecos")
 						.permitAll()
 						.requestMatchers("/error").permitAll()
-						// Perfil e pedidos são do cliente; a área dos agentes, só deles.
 						.requestMatchers("/api/clientes/me", "/api/pedidos/**").hasRole(Papel.CLIENTE.name())
-						// Os bancos respondem sozinhos; o painel é só do agente da PinkGo.
 						.requestMatchers("/api/agentes/**").hasRole(Papel.AGENTE_EMPRESA.name())
 						.anyRequest().authenticated())
 				.oauth2ResourceServer(o -> o.jwt(j -> j.jwtAuthenticationConverter(usuarioJwtConverter)));

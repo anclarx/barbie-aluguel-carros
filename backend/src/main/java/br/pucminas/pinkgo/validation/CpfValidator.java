@@ -5,14 +5,12 @@ import jakarta.validation.ConstraintValidatorContext;
 
 public class CpfValidator implements ConstraintValidator<Cpf, String> {
 
-	/** Remove pontos, traço e espaços. */
 	public static String apenasDigitos(String cpf) {
 		return cpf == null ? "" : cpf.replaceAll("\\D", "");
 	}
 
 	@Override
 	public boolean isValid(String valor, ConstraintValidatorContext context) {
-		// Campo vazio é responsabilidade do @NotBlank.
 		if (valor == null || valor.isBlank()) return true;
 		String cpf = apenasDigitos(valor);
 		if (cpf.length() != 11 || cpf.chars().distinct().count() == 1) return false;

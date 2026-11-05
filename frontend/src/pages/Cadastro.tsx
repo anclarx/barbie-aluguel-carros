@@ -20,10 +20,8 @@ const etapas: Etapa[] = [
   { label: "Renda", icon: "cofrinho" },
 ];
 
-/** Campos formatados enquanto a pessoa digita. */
 const mascaras: Partial<Record<string, (valor: string) => string>> = { cpf: mascaraCpf, rg: mascaraRg };
 
-/** Campos de cada etapa, para abrir a etapa certa quando o servidor recusa um deles. */
 const etapaDosCampos = [
   ["email", "senha"],
   ["nome", "cpf", "rg", "endereco"],
@@ -92,13 +90,11 @@ export function Cadastro() {
     ev.preventDefault();
     if (!validar()) return;
     if (etapa < 2) {
-      // E-mail (etapa 1), CPF e RG (etapa 2) não podem repetir: confere no servidor antes de avançar.
       setEnviando(true);
       try {
         await clienteService.verificar(etapa === 0 ? { email: dados.email } : { cpf: dados.cpf, rg: dados.rg });
         setEtapa(etapa + 1);
       } catch (erro) {
-        // Sem campo na resposta (ex.: servidor fora do ar), a mensagem vai para o primeiro campo da etapa.
         const doServidor =
           erro instanceof ApiError && Object.keys(erro.erros).length
             ? erro.erros
@@ -117,7 +113,6 @@ export function Cadastro() {
       await clienteService.cadastrar({ email, senha, nome, cpf, rg, endereco, profissao, rendimentos });
       setConcluido(true);
     } catch (erro) {
-      // Unicidade de e-mail, CPF e RG é validada no servidor: volta para a etapa do campo com erro.
       const doServidor = erro instanceof ApiError ? erro.erros : {};
       const etapaComErro = etapaDosCampos.findIndex((campos) => campos.some((c) => doServidor[c]));
       const novos = Object.keys(doServidor).length ? doServidor : { rendimentos: mensagemDeErro(erro) };

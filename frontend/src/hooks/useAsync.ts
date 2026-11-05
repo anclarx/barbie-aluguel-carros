@@ -6,14 +6,9 @@ export type Async<T> = {
   dados: T | undefined;
   erro: unknown;
   carregando: boolean;
-  /** Busca de novo mantendo os dados atuais na tela até a resposta chegar. */
   recarregar: () => void;
 };
 
-/**
- * Carrega dados assíncronos e refaz a busca quando `chave` muda (ex.: o id do local ou a página).
- * Respostas que chegam depois de uma troca de chave são descartadas.
- */
 export function useAsync<T>(carregar: () => Promise<T>, chave: string): Async<T> {
   const [resultado, setResultado] = useState<Resultado<T> | null>(null);
   const [versao, setVersao] = useState(0);

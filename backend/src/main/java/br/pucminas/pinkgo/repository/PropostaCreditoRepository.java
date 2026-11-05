@@ -11,7 +11,6 @@ import br.pucminas.pinkgo.entity.PropostaCredito;
 
 public interface PropostaCreditoRepository extends JpaRepository<PropostaCredito, Long> {
 
-	/** Propostas esperando resposta, enviadas até `limite`, de pedidos que ainda estão em análise. */
 	@Query("""
 			select p from PropostaCredito p join fetch p.pedido pe join fetch p.banco
 			where p.status = br.pucminas.pinkgo.entity.StatusProposta.EM_ANALISE

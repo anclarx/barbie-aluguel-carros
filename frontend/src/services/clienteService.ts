@@ -6,7 +6,6 @@ type DadosCliente = Omit<Cliente, "id" | "rendimentos"> & { rendimentos: Rendime
 export type Cadastro = DadosCliente & { senha: string };
 export type AtualizacaoCliente = DadosCliente & { senhaAtual?: string; novaSenha?: string };
 
-/** O id local do rendimento não vai para a API: o servidor substitui a lista inteira. */
 const paraApi = (rendimentos: Rendimento[]) =>
   rendimentos.map(({ tipo, entidadeEmpregadora, valorMensal }) => ({
     tipo: tipo || null,
@@ -20,6 +19,5 @@ export const clienteService = {
   atualizar: (dados: AtualizacaoCliente) =>
     http.put<Cliente>("/clientes/me", { ...dados, rendimentos: paraApi(dados.rendimentos) }),
   excluir: () => http.delete("/clientes/me"),
-  /** Confere numa etapa do cadastro se e-mail, CPF ou RG já têm conta; o repetido volta em `ApiError.erros`. */
   verificar: (dados: Partial<Record<"email" | "cpf" | "rg", string>>) => http.post<void>("/clientes/verificacao", dados),
 };

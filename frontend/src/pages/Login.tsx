@@ -31,14 +31,11 @@ export function Login() {
     setEnviando(true);
     try {
       const papel = await entrar(email, senha, manter);
-      // Agentes vão para o painel deles; clientes voltam para onde estavam. Quem começou um pedido sem conta (e
-      // pode ter passado pelo cadastro antes) volta para a Início, onde ele reabre; senão, vai para os aluguéis.
       const voltarPara = (location.state as { from?: string } | null)?.from;
       const destino =
         papel !== "CLIENTE" ? "/agente" : (voltarPara ?? (lerPedidoPendente() ? "/" : "/alugueis"));
       navigate(destino, { replace: true });
     } catch (erro) {
-      // E-mail ou senha errados aparecem embaixo da senha, sem dizer qual dos dois falhou.
       const doServidor = erro instanceof ApiError && erro.erros.email ? erro.erros : { senha: mensagemDeErro(erro) };
       setErros(doServidor);
       toast.camposInvalidos(doServidor, "Não foi possível entrar");

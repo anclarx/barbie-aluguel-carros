@@ -10,7 +10,6 @@ type CartoesProps = {
   onChange: (situacao: Situacao) => void;
 };
 
-/** Os cinco cartões lado a lado; o da situação escolhida fica rosa e filtra a lista. */
 export function CartoesSituacao({ resumo, textos, ativa, onChange }: CartoesProps) {
   return (
     <div className="grid grid-cols-5 gap-16">
@@ -46,7 +45,6 @@ export function CartoesSituacao({ resumo, textos, ativa, onChange }: CartoesProp
   );
 }
 
-/** Rótulo pequeno em cima de um valor, nas linhas da lista de pedidos. */
 export function Info({ rotulo, valor, className }: { rotulo: string; valor: string; className?: string }) {
   return (
     <div className={cn("flex w-100 flex-col", className)}>

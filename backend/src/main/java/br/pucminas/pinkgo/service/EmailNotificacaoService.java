@@ -15,7 +15,6 @@ import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
-/** Envia as mensagens por e-mail (SMTP), com versão em HTML e em texto simples. */
 public class EmailNotificacaoService implements NotificacaoService {
 
 	private static final Logger log = LoggerFactory.getLogger(EmailNotificacaoService.class);
@@ -46,15 +45,10 @@ public class EmailNotificacaoService implements NotificacaoService {
 			sender.send(mensagem);
 			log.info("E-mail de redefinição de senha enviado para {}.", email);
 		} catch (MessagingException | MailException | UnsupportedEncodingException e) {
-			// A tela já respondeu "enviamos o link" (não pode revelar se a conta existe): o erro fica no log.
 			log.error("Não foi possível enviar o e-mail de redefinição de senha para {}: {}", email, e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * O MAIL_FROM pode vir só com o endereço ("pinkgo@gmail.com") ou com nome ("PinkGo <pinkgo@gmail.com>"). Sem nome,
-	 * o remetente aparece como "PinkGo".
-	 */
 	private InternetAddress remetente() throws AddressException, UnsupportedEncodingException {
 		InternetAddress endereco = new InternetAddress(remetente.trim(), true);
 		if (endereco.getPersonal() == null || endereco.getPersonal().isBlank()) endereco.setPersonal("PinkGo", "UTF-8");
@@ -78,7 +72,6 @@ public class EmailNotificacaoService implements NotificacaoService {
 				""".formatted(primeiroNome(nome), RedefinicaoSenhaService.VALIDADE.toMinutes(), link);
 	}
 
-	/** HTML com tabelas e estilos inline: o formato que os clientes de e-mail (Gmail, Outlook) entendem. */
 	static String html(String nome, String link) {
 		String nomeSeguro = HtmlUtils.htmlEscape(primeiroNome(nome));
 		String linkSeguro = HtmlUtils.htmlEscape(link);

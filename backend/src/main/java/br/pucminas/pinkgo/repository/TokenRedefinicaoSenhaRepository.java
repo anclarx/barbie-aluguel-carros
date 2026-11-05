@@ -14,7 +14,6 @@ public interface TokenRedefinicaoSenhaRepository extends JpaRepository<TokenRede
 
 	Optional<TokenRedefinicaoSenha> findByTokenHash(String tokenHash);
 
-	/** Pedir um link novo invalida os anteriores do mesmo cliente. */
 	@Modifying
 	@Query("update TokenRedefinicaoSenha t set t.usadoEm = :agora where t.cliente.id = :clienteId and t.usadoEm is null")
 	void invalidarDoCliente(@Param("clienteId") Long clienteId, @Param("agora") Instant agora);

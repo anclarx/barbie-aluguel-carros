@@ -12,7 +12,6 @@ import br.pucminas.pinkgo.entity.Modelo;
 
 public interface ModeloRepository extends JpaRepository<Modelo, Long> {
 
-	/** Modelos com automóvel no local informado, ou em qualquer um quando `localId` é nulo. Não olha datas. */
 	@EntityGraph(attributePaths = "fotos")
 	@Query("""
 			select m from Modelo m

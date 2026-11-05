@@ -11,7 +11,6 @@ import br.pucminas.pinkgo.service.EnderecoService.PhotonResposta;
 import br.pucminas.pinkgo.service.EnderecoService.PhotonResposta.Feature;
 import br.pucminas.pinkgo.service.EnderecoService.PhotonResposta.Propriedades;
 
-/** Conversão da resposta do Photon (OpenStreetMap), sem chamar o serviço de verdade. */
 class EnderecoServiceTest {
 
 	private static Feature rua(String nome, String numero, String bairro, String cep) {

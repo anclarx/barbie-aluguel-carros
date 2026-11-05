@@ -8,10 +8,8 @@ import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 import { PickerDate, PickerSelect } from "../ui/PickerField";
 
-/** Busca confirmada, já com os ids das lojas. */
 export type Busca = { localRetiradaId: number; localDevolucaoId: number; dataRetirada: string; dataDevolucao: string };
 
-/** Valores do formulário: os selects guardam o id da loja como texto. */
 type Campos = Record<"localRetirada" | "localDevolucao" | "dataRetirada" | "dataDevolucao", string>;
 
 const camposVazios: Campos = { localRetirada: "", localDevolucao: "", dataRetirada: "", dataDevolucao: "" };
@@ -25,9 +23,7 @@ const rotulos: Campos = {
 
 type Props = { onPesquisar: (busca: Busca) => void; onLimpar: () => void };
 
-/** Card de busca sobre o banner da Início: loja e período do aluguel. */
 export function BuscaAluguel({ onPesquisar, onLimpar }: Props) {
-  // As lojas são fixas (onde a PinkGo tem agência), então a pessoa escolhe numa lista.
   const lojas = (useLocais().dados ?? []).map((l) => ({ value: String(l.id), label: l.descricao }));
   const [valor, setValor] = useSessionState(CHAVES_SESSAO.camposBusca, camposVazios);
   const [erros, setErros] = useState<Partial<Campos>>({});
@@ -51,7 +47,6 @@ export function BuscaAluguel({ onPesquisar, onLimpar }: Props) {
       e.dataDevolucao = "Pelo menos 1 dia após a retirada.";
     setErros(e);
     if (Object.keys(e).length) {
-      // Embaixo do campo a mensagem é curta; no aviso, o título diz de qual campo ela é.
       toast.camposInvalidos(e, "Confira a busca", rotulos);
       return;
     }
@@ -83,7 +78,6 @@ export function BuscaAluguel({ onPesquisar, onLimpar }: Props) {
           placeholder="Local de retirada"
           options={lojas}
           {...campo("localRetirada")}
-          // Quem ainda não escolheu onde devolver costuma devolver na mesma loja.
           onChange={(e) => {
             const localRetirada = e.target.value;
             setValor((v) => ({ ...v, localRetirada, localDevolucao: v.localDevolucao || localRetirada }));
@@ -100,7 +94,6 @@ export function BuscaAluguel({ onPesquisar, onLimpar }: Props) {
           label="Data de retirada"
           min={primeiraRetirada()}
           {...campo("dataRetirada")}
-          // Se a devolução ficou antes do mínimo da nova retirada, ela é apagada para a pessoa escolher de novo.
           onChange={(e) => {
             const dataRetirada = e.target.value;
             setValor((v) => ({

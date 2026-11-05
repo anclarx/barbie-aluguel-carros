@@ -24,7 +24,6 @@ import br.pucminas.pinkgo.security.UsuarioLogado;
 import br.pucminas.pinkgo.service.PedidoService;
 import jakarta.validation.Valid;
 
-/** Todas as rotas agem sobre os pedidos do cliente do token. */
 @RestController
 @RequestMapping("/api/pedidos")
 public class PedidoController {
@@ -65,7 +64,6 @@ public class PedidoController {
 		return pedidoService.editar(clienteId, id, req);
 	}
 
-	/** Escolha do banco que vai financiar, entre os que aprovaram o crédito. */
 	@PostMapping("/{id}/financiamento")
 	public PedidoResponse escolherFinanciamento(@UsuarioLogado Long clienteId, @PathVariable Long id,
 			@RequestBody @Valid FinanciamentoRequest req) {
@@ -77,7 +75,6 @@ public class PedidoController {
 		return pedidoService.desistirDoFinanciamento(clienteId, id);
 	}
 
-	/** Cancelar é uma ação sobre o pedido, que continua existindo com status CANCELADO. */
 	@PostMapping("/{id}/cancelamento")
 	public PedidoResponse cancelar(@UsuarioLogado Long clienteId, @PathVariable Long id) {
 		return pedidoService.cancelar(clienteId, id);

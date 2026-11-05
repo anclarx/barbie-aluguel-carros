@@ -24,7 +24,6 @@ import br.pucminas.pinkgo.repository.AgenteRepository;
 import br.pucminas.pinkgo.repository.ClienteRepository;
 import br.pucminas.pinkgo.repository.PedidoRepository;
 
-/** Carrega o arquivo de exemplo de verdade; a transação do teste desfaz tudo no fim. */
 @SpringBootTest(properties = "pinkgo.bancos.analise-automatica=false")
 @Transactional
 class CargaDadosIniciaisTest {
@@ -68,11 +67,9 @@ class CargaDadosIniciaisTest {
 		assertThat(comCredito.pendenciaParaAprovar()).isEmpty();
 		assertThat(comCredito.getLocalDevolucao().getBairro()).isEqualTo("Pinheiros");
 
-		// Subir de novo não duplica.
 		assertThat(carga.carregar(exemplo())).isZero();
 	}
 
-	/** O arquivo de verdade: cada pedido dos clientes novos precisa entrar (nenhum fica de fora por regra). */
 	@Test
 	void arquivoDoProjetoCarregaTodosOsPedidos() throws IOException {
 		var dados = CargaDadosIniciais.ler(new ClassPathResource("dados-iniciais.json")
@@ -105,7 +102,6 @@ class CargaDadosIniciaisTest {
 		assertThat(pedidoRepository.findAll()).noneMatch(p -> p.getCliente().getId().equals(cliente.getId()));
 	}
 
-	/** Sem a transação do teste: o cliente usa a sua, como ao subir. Ele falha, então nada fica no banco. */
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	void clienteComCpfInvalidoNaoEntra() {

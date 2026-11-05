@@ -9,9 +9,6 @@ import { PropostaBadge } from "../ui/Badge";
 import { Checkbox, DateField, SelectField } from "../ui/Field";
 import { Icon } from "../ui/Icon";
 
-/* Seções da coluna da esquerda dos modais de pedido (Figma "Modal periodo e confirmacao" e "Modal editar pedido"). */
-
-/** Bloco com título dos modais de pedido (e do modal de análise do agente). */
 export function Secao({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-12">
@@ -29,7 +26,6 @@ export function SecaoModelo({ modelo }: { modelo: Modelo }) {
   );
 }
 
-/** A placa só existe depois que o servidor reserva o automóvel; antes disso, o card explica quando ela aparece. */
 export function SecaoAutomovelReservado({ placa }: { placa?: string }) {
   return (
     <Secao titulo="Detalhes do automóvel reservado">
@@ -99,7 +95,6 @@ type OpcaoProps = {
   children?: ReactNode;
 };
 
-/** Card de opção com radio; selecionado, ganha borda rosa e mostra o conteúdo de dentro. */
 function OpcaoLiquidacao({ selecionada, onSelecionar, titulo, descricao, valor, children }: OpcaoProps) {
   return (
     <div
@@ -131,7 +126,6 @@ type BancoProps = {
   banco: Banco;
   total: number;
   parcelas: number | undefined;
-  /** Só no modal de edição: situação da análise, ou NAO_ENVIADO para o banco ainda não escolhido. */
   status?: StatusProposta | "NAO_ENVIADO";
   onAlternar: () => void;
   onParcelas: (n: number) => void;
@@ -139,13 +133,11 @@ type BancoProps = {
 
 function BancoOpcao({ banco, total, parcelas, status, onAlternar, onParcelas }: BancoProps) {
   const escolhido = parcelas !== undefined;
-  // Banco não escolhido mostra o total no maior parcelamento, para dar ideia do custo.
   const simulacao = simular(total, banco, parcelas ?? Math.max(...banco.opcoesParcelas));
   return (
     <div className="flex flex-col gap-12 rounded-lg border border-neutral-border bg-neutral-white p-16">
       <div className="flex items-center gap-8">
         <Checkbox checked={escolhido} onChange={onAlternar} aria-label={`Usar o ${banco.nome}`} />
-        {/* Sem logo dos bancos fictícios: a inicial ocupa o lugar dela. */}
         <span aria-hidden className="flex size-46 shrink-0 items-center justify-center rounded-md bg-brand-pink-soft text-body-bold text-brand-primary">
           {banco.nome.replace("Banco ", "").charAt(0)}
         </span>
@@ -200,7 +192,6 @@ function BancoOpcao({ banco, total, parcelas, status, onAlternar, onParcelas }: 
 
 type LiquidacaoProps = {
   form: FormularioPedido;
-  /** Edição: situação de cada banco já enviado, por id do banco. */
   statusPorBanco?: Record<number, StatusProposta>;
   dica: string;
   aviso: string;

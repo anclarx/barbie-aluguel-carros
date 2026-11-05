@@ -7,28 +7,20 @@ type Props<T> = {
   error?: string;
   icon: IconName;
   placeholder: string;
-  /** Texto digitado; o componente pai guarda para buscar as sugestões. */
   texto: string;
   onTextoChange: (texto: string) => void;
   sugestoes: T[];
   carregando?: boolean;
-  /** Mensagem quando a busca falhou; aparece no lugar das sugestões. */
   erroBusca?: string;
-  /** Abaixo disso a lista nem abre (ex.: o endereço só busca a partir de 3 letras). */
   minimoCaracteres?: number;
   chave: (item: T) => string | number;
   renderSugestao: (item: T) => ReactNode;
   onSelecionar: (item: T) => void;
   vazio?: string;
   autoComplete?: string;
-  /** Linha fixa no fim da lista, como a atribuição dos dados. */
   rodape?: ReactNode;
 };
 
-/**
- * Campo com sugestões enquanto a pessoa digita (padrão combobox da WAI-ARIA): setas navegam, Enter escolhe e Esc
- * fecha a lista.
- */
 export function Autocomplete<T>({
   label,
   error,
@@ -82,7 +74,6 @@ export function Autocomplete<T>({
       <div className="relative">
         <div
           className={cn(
-            // Mesma caixa do TextField, para combinar com os outros campos do formulário.
             "flex h-46 w-full items-center gap-8 rounded-md border border-neutral-border bg-neutral-white px-16 text-body-medium text-neutral-text focus-within:border-brand-primary",
             error && "border-status-danger-text",
           )}
@@ -125,7 +116,6 @@ export function Autocomplete<T>({
             id={listaId}
             role="listbox"
             aria-label={label}
-            // Evita o blur do input antes do clique na sugestão.
             onMouseDown={(e) => e.preventDefault()}
             className="absolute inset-x-0 top-full z-20 mt-4 max-h-280 overflow-y-auto rounded-md border border-neutral-border bg-neutral-white py-4 shadow-dropdown"
           >

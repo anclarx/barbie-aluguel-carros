@@ -4,15 +4,12 @@ import { Icon } from "./Icon";
 
 type Props = {
   title: string;
-  /** Linha pequena acima do título (ex.: "Pedido #P12"). */
   contexto?: ReactNode;
-  /** Selo à esquerda do título, como o status nos modais de pedido (Figma "Modal editar/cancelar pedido"). */
   selo?: ReactNode;
   onClose: () => void;
   className?: string;
 };
 
-/** Cabeçalho dos modais: selo opcional, contexto, título e o X de fechar. */
 export function CabecalhoModal({ title, contexto, selo, onClose, className }: Props) {
   return (
     <header

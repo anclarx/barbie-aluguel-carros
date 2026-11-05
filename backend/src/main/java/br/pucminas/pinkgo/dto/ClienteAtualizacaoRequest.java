@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
-/** US07: edição do perfil. A senha só muda quando `novaSenha` vem preenchida, junto com a `senhaAtual`. */
 public record ClienteAtualizacaoRequest(
 		@NotBlank(message = "Informe seu nome completo.") String nome,
 		@NotBlank(message = "Informe seu CPF.") @Cpf String cpf,

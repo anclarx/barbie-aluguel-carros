@@ -20,10 +20,6 @@ import br.pucminas.pinkgo.security.UsuarioLogado;
 import br.pucminas.pinkgo.service.AgenteService;
 import jakarta.validation.Valid;
 
-/**
- * Painel do agente da PinkGo: pedidos recebidos, parecer da análise financeira (com justificativa opcional) e
- * contrato.
- */
 @RestController
 @RequestMapping("/api/agentes")
 public class AgenteController {

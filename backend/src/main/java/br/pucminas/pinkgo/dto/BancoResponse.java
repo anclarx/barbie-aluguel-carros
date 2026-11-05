@@ -5,7 +5,6 @@ import java.util.List;
 
 import br.pucminas.pinkgo.entity.Banco;
 
-/** Banco e suas condições. `jurosMensal` e `entradaMinima` estão em %. */
 public record BancoResponse(Long id, String nome, BigDecimal jurosMensal, int parcelasMaximas, BigDecimal entradaMinima,
 		List<Integer> opcoesParcelas) {
 

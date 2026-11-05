@@ -10,7 +10,6 @@ type ResumoProps = {
   comCredito: boolean;
 };
 
-/** Cartão "Resumo do pedido de aluguel" com o total calculado (diária × dias). */
 export function ResumoPedido({ modelo, diaria, dataRetirada, dataEntrega, comCredito }: ResumoProps) {
   const dias = diasEntre(dataRetirada, dataEntrega);
   const linhas: Array<[string, string]> = [
@@ -54,7 +53,6 @@ const etapaAtual: Record<StatusPedido, number> = {
   CONTRATO_ENCERRADO: 4,
 };
 
-/** Barra de andamento do pedido. */
 export function AndamentoPedido({ status }: { status: StatusPedido }) {
   return <Stepper etapas={etapas} atual={etapaAtual[status]} />;
 }

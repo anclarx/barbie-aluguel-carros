@@ -36,7 +36,6 @@ const perguntas = [
   },
 ];
 
-/** Leva até o card de busca e põe o foco no primeiro campo. */
 const irParaBusca = () => {
   const busca = document.getElementById("busca");
   busca?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -68,7 +67,6 @@ function Faq() {
   );
 }
 
-/** Conteúdo da Início antes da busca: como funciona, destaque e perguntas frequentes. */
 function Apresentacao() {
   return (
     <>
@@ -119,22 +117,18 @@ export function Home() {
   const { cliente, agente } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
-  // A busca confirmada fica na sessão: voltando de outra página, a vitrine reaparece como estava.
   const [busca, setBusca] = useSessionState<Busca | null>(CHAVES_SESSAO.busca, null);
-  // Pedido começado antes do login volta aberto, com as mesmas escolhas, quando o cliente chega à Início.
   const [alugar, setAlugar] = useState<{ modelo: Modelo; valores?: ValoresPedido } | null>(() =>
     cliente ? lerPedidoPendente() : null,
   );
   const acabouDePesquisar = useRef(false);
 
-  // Só desce até os veículos depois de clicar em "Pesquisar", não ao voltar para a Início com a busca guardada.
   useEffect(() => {
     if (!busca || !acabouDePesquisar.current) return;
     acabouDePesquisar.current = false;
     document.getElementById("veiculos")?.scrollIntoView({ behavior: "smooth" });
   }, [busca]);
 
-  /** Busca nova (ou Limpar) começa com os filtros laterais e a página zerados. */
   const trocarBusca = (nova: Busca | null) => {
     esquecerSessionState(CHAVES_SESSAO.filtroVitrine, CHAVES_SESSAO.paginaVitrine);
     acabouDePesquisar.current = nova !== null;
@@ -142,9 +136,7 @@ export function Home() {
   };
 
   const iniciarAluguel = (modelo: Modelo) => {
-    // Agente não aluga carro: volta para o painel dele.
     if (agente) return navigate("/agente");
-    // Visitante também abre o pedido; para enviar, o modal leva para entrar ou criar conta.
     setAlugar({ modelo });
   };
 
@@ -158,7 +150,6 @@ export function Home() {
       </section>
 
       {busca ? (
-        // A key recria a vitrine a cada busca; como `trocarBusca` apagou os filtros guardados, ela começa do zero.
         <Vitrine
           key={`${busca.localRetiradaId}:${busca.dataRetirada}:${busca.dataDevolucao}`}
           localId={busca.localRetiradaId}

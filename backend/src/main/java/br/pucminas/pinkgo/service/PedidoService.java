@@ -39,13 +39,11 @@ import br.pucminas.pinkgo.repository.LocalRepository;
 import br.pucminas.pinkgo.repository.ModeloRepository;
 import br.pucminas.pinkgo.repository.PedidoRepository;
 
-/** Pedidos do cliente: criar (US03), consultar (US04), modificar (US05) e cancelar (US06). */
 @Service
 @Transactional
 public class PedidoService {
 
 	private static final int TAMANHO_MAXIMO = 50;
-	/** Id que nenhum pedido tem: ao criar, não há pedido próprio para ignorar na conferência do automóvel. */
 	private static final Long SEM_PEDIDO = 0L;
 	private static final Sort MAIS_RECENTES = Sort.by(Sort.Order.desc("dataSolicitacao"), Sort.Order.desc("id"));
 
@@ -69,10 +67,6 @@ public class PedidoService {
 		this.clock = clock;
 	}
 
-	/**
-	 * Reserva um automóvel do modelo livre no período (na loja de retirada, quando informada) e abre o pedido. A
-	 * devolução pode ser em qualquer loja.
-	 */
 	public PedidoResponse criar(Long clienteId, PedidoRequest req) {
 		validarPeriodo(req.dataRetirada(), req.dataEntrega());
 		Cliente cliente = clienteRepository.findById(clienteId)
@@ -93,7 +87,6 @@ public class PedidoService {
 		return PedidoResponse.de(pedidoRepository.save(pedido));
 	}
 
-	/** `pagina` começa em 1. Sem `status`, traz todos. */
 	@Transactional(readOnly = true)
 	public PaginaResponse<PedidoResponse> listar(Long clienteId, Collection<StatusPedido> status, int pagina,
 			int tamanho) {
@@ -125,8 +118,6 @@ public class PedidoService {
 		pedido.exigirModificavel("editado");
 		Map<Banco, Integer> propostas = escolhasDeCredito(req.comCredito(), req.propostas());
 
-		// Novas datas ou outra loja: confere de novo o automóvel. O atual fica se continuar livre; senão, vem outro
-		// do mesmo modelo na loja de retirada.
 		Local loja = req.localRetiradaId() == null ? pedido.getLocalRetirada() : local(req.localRetiradaId());
 		Automovel automovel = automovelLivre(pedido.getModelo().getId(), loja, req.dataRetirada(), req.dataEntrega(),
 				pedido, "localRetiradaId");
@@ -139,10 +130,6 @@ public class PedidoService {
 		return PedidoResponse.de(pedido);
 	}
 
-	/**
-	 * Bancos escolhidos e o parcelamento em cada um. Com crédito, é preciso pelo menos um banco, sem repetir, e um
-	 * parcelamento que o banco oferece. Sem crédito, a lista é ignorada.
-	 */
 	private Map<Banco, Integer> escolhasDeCredito(boolean comCredito, List<PropostaRequest> propostas) {
 		if (!comCredito) return Map.of();
 		if (propostas == null || propostas.isEmpty())
@@ -161,14 +148,12 @@ public class PedidoService {
 		return escolhas;
 	}
 
-	/** Depois da resposta dos bancos, o cliente escolhe qual vai financiar o aluguel. */
 	public PedidoResponse escolherFinanciamento(Long clienteId, Long pedidoId, Long bancoId) {
 		Pedido pedido = pedidoDoCliente(clienteId, pedidoId);
 		pedido.escolherFinanciamento(bancoId);
 		return PedidoResponse.de(pedido);
 	}
 
-	/** O cliente desiste do crédito: o aluguel segue sem financiamento. */
 	public PedidoResponse desistirDoFinanciamento(Long clienteId, Long pedidoId) {
 		Pedido pedido = pedidoDoCliente(clienteId, pedidoId);
 		pedido.desistirDoFinanciamento();
@@ -181,10 +166,6 @@ public class PedidoService {
 		return PedidoResponse.de(pedido);
 	}
 
-	/**
-	 * Primeiro automóvel do modelo sem pedido ativo nos dias do período, na loja (ou em qualquer uma quando `loja` é
-	 * nula). Na edição, o automóvel atual do pedido tem preferência e os dias do próprio pedido não contam.
-	 */
 	private Automovel automovelLivre(Long modeloId, Local loja, LocalDate retirada, LocalDate entrega,
 			Pedido emEdicao, String campo) {
 		List<Automovel> candidatos = loja == null ? automovelRepository.travarDoModelo(modeloId)
@@ -199,7 +180,6 @@ public class PedidoService {
 						+ (loja == null ? "" : " em " + loja.getDescricao()) + " nesse período."));
 	}
 
-	/** Retirada a partir de amanhã e devolução pelo menos 1 dia depois da retirada (mesma regra do front). */
 	private void validarPeriodo(LocalDate retirada, LocalDate entrega) {
 		if (retirada.isBefore(hoje().plusDays(1)))
 			throw new RegraDeNegocioException("dataRetirada", "A retirada precisa ser a partir de amanhã.");
@@ -207,7 +187,6 @@ public class PedidoService {
 			throw new RegraDeNegocioException("dataEntrega", "A entrega precisa ser pelo menos 1 dia depois da retirada.");
 	}
 
-	/** Pedido de outro cliente responde como inexistente, para não revelar que o id existe. */
 	private Pedido pedidoDoCliente(Long clienteId, Long pedidoId) {
 		return pedidoRepository.findById(pedidoId)
 				.filter(p -> p.pertenceA(clienteId))

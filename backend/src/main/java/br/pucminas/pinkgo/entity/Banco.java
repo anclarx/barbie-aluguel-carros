@@ -14,14 +14,12 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** Banco agente que concede o crédito do aluguel, com as condições que ele oferece. */
 @Entity
 @Table(name = "bancos")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Banco {
 
-	/** As opções de parcelamento andam de 6 em 6 meses até o máximo do banco (6x, 12x, 18x…). */
 	private static final int PASSO_PARCELAS = 6;
 
 	@Id
@@ -31,14 +29,12 @@ public class Banco {
 	@Column(nullable = false, unique = true)
 	private String nome;
 
-	/** Juros ao mês em %, como "1.49". */
 	@Column(nullable = false, precision = 5, scale = 2)
 	private BigDecimal jurosMensal;
 
 	@Column(nullable = false)
 	private int parcelasMaximas;
 
-	/** Entrada mínima em % do total do aluguel, como "10". */
 	@Column(nullable = false, precision = 5, scale = 2)
 	private BigDecimal entradaMinima;
 

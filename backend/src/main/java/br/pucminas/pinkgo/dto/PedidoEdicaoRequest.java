@@ -6,7 +6,6 @@ import java.util.List;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
-/** US05: o cliente troca as lojas, o período, a forma de liquidação e os bancos. Lojas nulas ficam como estão. */
 public record PedidoEdicaoRequest(
 		Long localRetiradaId,
 		Long localDevolucaoId,

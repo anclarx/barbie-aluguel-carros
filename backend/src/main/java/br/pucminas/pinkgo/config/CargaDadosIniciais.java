@@ -44,13 +44,6 @@ import br.pucminas.pinkgo.validation.CpfValidator;
 import br.pucminas.pinkgo.validation.Documentos;
 import tools.jackson.databind.json.JsonMapper;
 
-/**
- * Popula o banco com clientes, históricos de pedidos e agentes a partir de um JSON (por padrão
- * `src/main/resources/dados-iniciais.json`). Roda a cada subida, depois do {@link DataLoader} (lojas, catálogo e
- * bancos), e pula quem já existe pelo e-mail: quem configura um Supabase novo recebe tudo ao ligar o sistema, e
- * reiniciar não duplica nada. Cada cliente entra na sua própria transação, então um registro com problema não
- * impede os outros (o motivo vai para o log). O formato está no README, em "Dados iniciais".
- */
 @Component
 @Order(2)
 public class CargaDadosIniciais implements ApplicationRunner {
@@ -58,8 +51,6 @@ public class CargaDadosIniciais implements ApplicationRunner {
 	private static final Logger log = LoggerFactory.getLogger(CargaDadosIniciais.class);
 	private static final JsonMapper JSON = JsonMapper.builder().build();
 	private static final CpfValidator CPF = new CpfValidator();
-
-	/* Formato do arquivo. Campos opcionais podem ser omitidos. */
 
 	public record Dados(List<AgenteJson> agentes, List<ClienteJson> clientes) {
 		public Dados {
@@ -75,24 +66,17 @@ public class CargaDadosIniciais implements ApplicationRunner {
 			String profissao, List<RendimentoJson> rendimentos, List<PedidoJson> pedidos) {
 	}
 
-	/** `entidadeEmpregadora` é opcional; `tipo` é um de {@link TipoRendimento}. */
 	public record RendimentoJson(TipoRendimento tipo, String entidadeEmpregadora, BigDecimal valorMensal) {
 	}
 
-	/**
-	 * Um pedido do histórico. `lojaRetirada` e `lojaDevolucao` são o bairro ou a cidade da loja (devolução padrão: a
-	 * mesma). `solicitadoEm` padrão: hoje. `status` padrão: em análise. `credito` ausente = sem financiamento.
-	 */
 	public record PedidoJson(String modelo, String lojaRetirada, String lojaDevolucao, LocalDate retirada,
 			LocalDate entrega, LocalDate solicitadoEm, CreditoJson credito, StatusPedido status,
 			TipoContrato tipoContrato, String justificativa) {
 	}
 
-	/** Bancos consultados e o escolhido pelo cliente (nome do banco), se já escolheu. */
 	public record CreditoJson(List<PropostaJson> propostas, String bancoEscolhido) {
 	}
 
-	/** `aprovada` ausente = o banco ainda vai responder (resposta automática, uns 30 s depois de subir). */
 	public record PropostaJson(String banco, int parcelas, Boolean aprovada, String motivo) {
 	}
 
@@ -134,12 +118,10 @@ public class CargaDadosIniciais implements ApplicationRunner {
 		}
 	}
 
-	/** Também usado pelos testes, com um JSON montado na hora. */
 	public static Dados ler(String json) {
 		return JSON.readValue(json, Dados.class);
 	}
 
-	/** Carrega o que ainda não existe e devolve quantos clientes entraram. */
 	public int carregar(Dados dados) {
 		dados.agentes().forEach(a -> registrar("agente " + a.email(), () -> criarAgente(a)));
 		int novos = 0;
@@ -149,7 +131,6 @@ public class CargaDadosIniciais implements ApplicationRunner {
 		return novos;
 	}
 
-	/** Cada registro na sua transação; um erro desfaz só ele e vai para o log. */
 	private boolean registrar(String oque, java.util.function.BooleanSupplier criar) {
 		try {
 			return Boolean.TRUE.equals(transacao.execute(s -> criar.getAsBoolean()));
@@ -180,8 +161,6 @@ public class CargaDadosIniciais implements ApplicationRunner {
 				.map(r -> new Rendimento(r.tipo(), r.entidadeEmpregadora(), r.valorMensal())).toList());
 		clienteRepository.save(cliente);
 
-		// Em ordem: cada pedido já ocupa o seu carro para os próximos (regra de disponibilidade). Um pedido com
-		// problema fica de fora sozinho; as regras do domínio recusam antes de gravar, então nada fica pela metade.
 		for (PedidoJson p : Optional.ofNullable(c.pedidos()).orElse(List.of())) {
 			try {
 				pedidoRepository.saveAndFlush(criarPedido(cliente, p));
@@ -220,17 +199,14 @@ public class CargaDadosIniciais implements ApplicationRunner {
 					proposta.responder(pr.aprovada(), pr.motivo() != null ? pr.motivo()
 							: pr.aprovada() ? "Aprovada pela política do banco." : "Negada pela política do banco.");
 				} else if (jaAnalisado) {
-					// Pedido do histórico: o banco já respondeu, pela mesma política da resposta automática.
 					var resultado = AnaliseCreditoService.avaliar(proposta);
 					proposta.responder(resultado.aprovada(), resultado.motivo());
 				}
-				// Em análise e sem resposta: o banco responde sozinho uns 30 s depois de a API subir.
 			}
 			if (p.credito().bancoEscolhido() != null)
 				pedido.escolherFinanciamento(banco(p.credito().bancoEscolhido()).getId());
 		}
 
-		// Leva o pedido até o status do histórico pelos mesmos passos do sistema.
 		StatusPedido status = p.status() == null ? StatusPedido.EM_ANALISE_FINANCEIRA : p.status();
 		switch (status) {
 			case EM_ANALISE_FINANCEIRA -> {

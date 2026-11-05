@@ -15,10 +15,6 @@ function Linha({ rotulo, valor, className = "text-body-medium" }: { rotulo: stri
 
 type Props = { titulo: string; modelo: Modelo; form: FormularioPedido; children: ReactNode };
 
-/**
- * Coluna da direita dos modais de pedido: resumo do aluguel, total sem crédito e a simulação de cada banco
- * escolhido. `children` são os botões, logo abaixo do card.
- */
 export function ResumoAluguel({ titulo, modelo, form, children }: Props) {
   const { valores, dias, total, simulacoes } = form;
   return (

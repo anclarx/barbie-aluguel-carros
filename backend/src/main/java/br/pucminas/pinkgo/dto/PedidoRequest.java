@@ -6,10 +6,6 @@ import java.util.List;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
-/**
- * US03. As lojas vêm da busca da Início; quando faltam, o pedido usa a loja do automóvel reservado. Com crédito,
- * `propostas` traz os bancos escolhidos e o parcelamento em cada um.
- */
 public record PedidoRequest(
 		@NotNull(message = "Escolha o modelo.") Long modeloId,
 		Long localRetiradaId,

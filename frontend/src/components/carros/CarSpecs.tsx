@@ -12,7 +12,6 @@ function Spec({ icon, children }: { icon: IconName; children: string }) {
   );
 }
 
-/** Marca e ano em cima do nome do modelo. */
 export function TituloModelo({ modelo, className }: { modelo: Modelo; className?: string }) {
   return (
     <div className={cn("flex flex-col", className)}>
@@ -24,7 +23,6 @@ export function TituloModelo({ modelo, className }: { modelo: Modelo; className?
   );
 }
 
-/** Ícones de câmbio, combustível, assentos e diária. */
 export function CarSpecIcons({ modelo }: { modelo: Modelo }) {
   return (
     <div className="grid grid-cols-[1fr_auto] gap-x-24 gap-y-4">
@@ -36,10 +34,6 @@ export function CarSpecIcons({ modelo }: { modelo: Modelo }) {
   );
 }
 
-/**
- * Seguro, porta-malas e carroceria, numa linha e com a mesma largura (`minmax(0, 1fr)` não deixa um valor mais
- * comprido alargar a coluna). A placa nunca aparece aqui (US16).
- */
 export function CarAttributes({ modelo, className }: { modelo: Modelo; className?: string }) {
   const itens = [
     ["Seguro", modelo.seguro],
@@ -58,10 +52,6 @@ export function CarAttributes({ modelo, className }: { modelo: Modelo; className
   );
 }
 
-/**
- * Características do modelo em blocos com ícone, duas por linha: verso do cartão da vitrine (no estilo dos grupos
- * de carros da Localiza).
- */
 export function CarCaracteristicas({ modelo, className }: { modelo: Modelo; className?: string }) {
   const itens: Array<[IconName, string]> = [
     ["gasolina", modelo.combustivel],
@@ -83,8 +73,6 @@ export function CarCaracteristicas({ modelo, className }: { modelo: Modelo; clas
   );
 }
 
-
-/** Cartão "Modelo do automóvel escolhido" (modais de pedido). */
 export function CarResumoCard({ modelo, className }: { modelo: Modelo; className?: string }) {
   return (
     <div className={cn("flex flex-col gap-16 rounded-lg border border-neutral-border p-16", className)}>

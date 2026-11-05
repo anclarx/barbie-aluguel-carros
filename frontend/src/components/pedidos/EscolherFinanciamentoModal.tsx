@@ -11,13 +11,8 @@ import { Modal } from "../ui/Modal";
 
 type Props = { pedido: Pedido | null; onClose: () => void; onAlterado: () => void };
 
-/** Valor da opção escolhida: o id do banco, ou "sem" para seguir sem financiamento. */
 type Opcao = number | "sem";
 
-/**
- * Depois que os bancos respondem, o cliente escolhe qual deles vai financiar o aluguel, ou segue sem financiamento.
- * Só então a PinkGo dá o parecer do pedido.
- */
 export function EscolherFinanciamentoModal({ pedido, onClose, onAlterado }: Props) {
   if (!pedido) return null;
   return <Conteudo key={pedido.id} pedido={pedido} onClose={onClose} onAlterado={onAlterado} />;

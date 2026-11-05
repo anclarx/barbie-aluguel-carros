@@ -5,7 +5,6 @@ import { definirAoExpirarSessao } from "../services/http";
 import { atualizarClienteDaSessao, lerSessao, limparSessao, salvarSessao, type Sessao } from "../services/sessao";
 import { AuthContext, type AuthState } from "./authContext";
 
-/** Sessão (US02): o token fica no armazenamento do navegador e quem está logado, aqui no estado. */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [sessao, setSessao] = useState<Sessao | null>(lerSessao);
   const toast = useToast();
@@ -15,7 +14,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSessao(null);
   }, []);
 
-  // Token vencido (ou de uma conta que não existe mais) numa chamada autenticada encerra a sessão.
   useEffect(() => {
     definirAoExpirarSessao(() => {
       sair();

@@ -28,7 +28,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** Pedido de aluguel. As mudanças de estado passam pelos métodos de domínio, nunca por setters. */
 @Entity
 @Table(name = "pedidos")
 @Getter
@@ -82,10 +81,8 @@ public class Pedido {
 	@Column(nullable = false, length = 30)
 	private TipoContrato tipoContrato;
 
-	/** Banco que o cliente escolheu para financiar, entre os que aprovaram o crédito. */
 	private String bancoAssociado;
 
-	/** Por que o agente da PinkGo aprovou ou negou (opcional). */
 	@Column(length = 500)
 	private String justificativaParecer;
 
@@ -94,10 +91,6 @@ public class Pedido {
 	@Getter(AccessLevel.NONE)
 	private List<PropostaCredito> propostas = new ArrayList<>();
 
-	/**
-	 * Cria o pedido em análise financeira (US03). O automóvel fica reservado nos dias do pedido enquanto ele estiver
-	 * ativo; quem garante que ele estava livre é o PedidoService.
-	 */
 	public static Pedido criar(Cliente cliente, Automovel automovel, Local localRetirada, Local localDevolucao,
 			LocalDate dataRetirada, LocalDate dataEntrega, boolean comCredito, LocalDate hoje) {
 		Pedido pedido = new Pedido();
@@ -112,19 +105,15 @@ public class Pedido {
 		return pedido;
 	}
 
-	/** US05: troca período e crédito. Um pedido aprovado que é modificado volta para análise. */
 	public void alterar(LocalDate dataRetirada, LocalDate dataEntrega, boolean comCredito) {
 		exigirModificavel("editado");
 		BigDecimal totalAnterior = totalEstimado;
 		definirPeriodo(dataRetirada, dataEntrega, comCredito);
 		status = StatusPedido.EM_ANALISE_FINANCEIRA;
-		// Volta para análise: o banco do contrato é escolhido de novo no próximo parecer.
 		bancoAssociado = null;
-		// Outro total muda o valor financiado: todos os bancos precisam analisar de novo.
 		if (totalAnterior.compareTo(totalEstimado) != 0) propostas.forEach(PropostaCredito::reenviarParaAnalise);
 	}
 
-	/** Loja de retirada e automóvel que atende o período; podem ser os mesmos de antes. */
 	public void trocarRetirada(Local novaLoja, Automovel novoAutomovel) {
 		exigirModificavel("editado");
 		automovel = novoAutomovel;
@@ -136,10 +125,6 @@ public class Pedido {
 		localDevolucao = novaLoja;
 	}
 
-	/**
-	 * Bancos escolhidos e o parcelamento em cada um. Bancos que saem têm a proposta cancelada; os que entram vão para
-	 * análise; os que ficam só voltam para análise se o parcelamento mudar. Sem crédito, não há propostas.
-	 */
 	public void definirPropostas(Map<Banco, Integer> parcelasPorBanco) {
 		Map<Banco, Integer> escolhas = comCredito ? parcelasPorBanco : Map.of();
 		propostas.removeIf(p -> escolhas.keySet().stream().noneMatch(b -> b.getId().equals(p.getBanco().getId())));
@@ -154,19 +139,11 @@ public class Pedido {
 		return Collections.unmodifiableList(propostas);
 	}
 
-	/** US06: cancelado não ocupa mais o automóvel, então os dias dele voltam a ficar livres. */
 	public void cancelar() {
 		exigirModificavel("cancelado");
 		status = StatusPedido.CANCELADO;
 	}
 
-	/*
-	 * Análise do pedido. Fluxo: em análise financeira → (com crédito: os bancos respondem sozinhos e o cliente escolhe
-	 * um banco que aprovou, ou desiste do financiamento) → parecer do agente da PinkGo → aprovado ou negado → contrato
-	 * em execução → contrato encerrado.
-	 */
-
-	/** O cliente escolhe, entre os bancos que aprovaram, qual vai financiar o aluguel. */
 	public void escolherFinanciamento(Long bancoId) {
 		exigirStatus(StatusPedido.EM_ANALISE_FINANCEIRA, "alterado");
 		if (!comCredito) throw new RegraDeNegocioException("Este pedido não tem crédito bancário.");
@@ -177,7 +154,6 @@ public class Pedido {
 		bancoAssociado = proposta.getBanco().getNome();
 	}
 
-	/** O cliente desiste do financiamento: o aluguel passa a ser pago sem crédito e as propostas saem do pedido. */
 	public void desistirDoFinanciamento() {
 		exigirStatus(StatusPedido.EM_ANALISE_FINANCEIRA, "alterado");
 		if (!comCredito) throw new RegraDeNegocioException("Este pedido já está sem crédito bancário.");
@@ -187,10 +163,6 @@ public class Pedido {
 		propostas.clear();
 	}
 
-	/**
-	 * Falta alguma coisa para o agente poder aprovar? Com crédito, os bancos precisam ter respondido e o cliente,
-	 * escolhido um deles (ou desistido do crédito). Devolve o que falta, ou vazio quando está pronto.
-	 */
 	public Optional<String> pendenciaParaAprovar() {
 		if (!comCredito) return Optional.empty();
 		if (propostas.stream().anyMatch(p -> p.getStatus() == StatusProposta.EM_ANALISE))
@@ -201,10 +173,6 @@ public class Pedido {
 		return Optional.empty();
 	}
 
-	/**
-	 * Parecer favorável do agente da PinkGo, que também decide em nome de quem o automóvel fica durante o contrato.
-	 * Sem tipo informado, vale a sugestão do pedido. Propriedade do banco exige financiamento.
-	 */
 	public void aprovar(String justificativa, TipoContrato tipo) {
 		exigirStatus(StatusPedido.EM_ANALISE_FINANCEIRA, "aprovado");
 		pendenciaParaAprovar().ifPresent(p -> {
@@ -217,7 +185,6 @@ public class Pedido {
 		status = StatusPedido.APROVADO;
 	}
 
-	/** Parecer contrário do agente da PinkGo; o pedido vai para o histórico. */
 	public void negar(String justificativa) {
 		exigirStatus(StatusPedido.EM_ANALISE_FINANCEIRA, "negado");
 		registrarParecer(justificativa);
@@ -228,13 +195,11 @@ public class Pedido {
 		this.justificativaParecer = justificativa == null || justificativa.isBlank() ? null : justificativa.trim();
 	}
 
-	/** O cliente retirou o carro: o contrato aprovado começa a valer. */
 	public void iniciarContrato() {
 		exigirStatus(StatusPedido.APROVADO, "posto em execução");
 		status = StatusPedido.CONTRATO_EM_EXECUCAO;
 	}
 
-	/** O carro foi devolvido. */
 	public void encerrarContrato() {
 		exigirStatus(StatusPedido.CONTRATO_EM_EXECUCAO, "encerrado");
 		status = StatusPedido.CONTRATO_ENCERRADO;
@@ -261,11 +226,9 @@ public class Pedido {
 		this.dataEntrega = dataEntrega;
 		this.comCredito = comCredito;
 		this.tipoContrato = TipoContrato.para(comCredito);
-		// Total estimado = diária × (dataEntrega − dataRetirada), sempre calculado no servidor.
 		this.totalEstimado = modelo.getDiaria().multiply(BigDecimal.valueOf(dias()));
 	}
 
-	/** Recusa a ação quando o pedido já saiu de análise ou aprovado (US05, US06). */
 	public void exigirModificavel(String acao) {
 		if (!status.modificavel()) throw new RegraDeNegocioException("Este pedido não pode mais ser " + acao + ".");
 	}

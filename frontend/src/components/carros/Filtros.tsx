@@ -10,7 +10,6 @@ import { Icon } from "../ui/Icon";
 const campoPequeno =
   "h-36 w-full rounded-md border border-neutral-border px-12 text-body-medium outline-none placeholder:text-neutral-secondary focus:border-brand-primary";
 
-/* Dois sliders sobrepostos: o trilho é invisível e só as alças recebem clique. */
 const trilho = [
   "pointer-events-none absolute inset-0 h-14 w-full appearance-none bg-transparent",
   "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:size-14 [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand-primary",
@@ -41,7 +40,6 @@ function Grupo({ titulo, children }: { titulo: string; children: ReactNode }) {
 
 type ChipsProps = { opcoes: string[]; selecionadas: string[]; onToggle: (opcao: string) => void };
 
-/** Botões em pílula de múltipla escolha (marca, tipo de veículo). */
 function Chips({ opcoes, selecionadas, onToggle }: ChipsProps) {
   return (
     <div className="flex flex-wrap gap-6">
@@ -81,7 +79,6 @@ export function Filtros({ modelos, valor, onChange }: FiltrosProps) {
   const precoPiso = Math.min(...diarias);
   const precoTeto = Math.max(...diarias);
 
-  // Campo vazio = sem limite, então a alça fica na ponta da faixa.
   const limitar = (v: number) => Math.min(Math.max(v, precoPiso), precoTeto);
   const minAtual = valor.precoMin ? limitar(Number(valor.precoMin)) : precoPiso;
   const maxAtual = valor.precoMax ? limitar(Number(valor.precoMax)) : precoTeto;
@@ -167,7 +164,6 @@ export function Filtros({ modelos, valor, onChange }: FiltrosProps) {
             {(["precoMin", "precoMax"] as const).map((campo, i) => (
               <label key={campo} className="flex flex-1 flex-col gap-4">
                 <span className="text-label-medium text-neutral-secondary">{i === 0 ? "Valor mínimo" : "Valor máximo"}</span>
-                {/* Mesma máscara de reais do placeholder: preenchido (digitando ou pela barra) fica com texto escuro. */}
                 <input
                   type="text"
                   inputMode="numeric"
@@ -200,7 +196,6 @@ export function Filtros({ modelos, valor, onChange }: FiltrosProps) {
                 set({ precoMin: v === precoPiso ? "" : String(v) });
               }}
               className={trilho}
-              // Com as alças juntas no topo, a do mínimo precisa ficar por cima para ainda poder ser arrastada.
               style={{ zIndex: pct(minAtual) > 50 ? 1 : undefined }}
             />
             <input

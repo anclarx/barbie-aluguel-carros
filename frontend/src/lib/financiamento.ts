@@ -1,8 +1,5 @@
 import type { Banco, Simulacao } from "../types";
 
-/* Mesma conta do SimuladorFinanciamento do back-end (tabela Price), para o resumo mudar na hora em que a pessoa
- * troca as datas ou o parcelamento. Depois de salvo, o pedido traz os valores calculados pelo servidor. */
-
 const centavos = (valor: number) => Math.round(valor * 100) / 100;
 
 export function simular(totalAluguel: number, banco: Banco, parcelas: number): Simulacao {
@@ -22,9 +19,7 @@ export function simular(totalAluguel: number, banco: Banco, parcelas: number): S
   };
 }
 
-/** "1,49% a.m." */
 export const formatJuros = (banco: Banco) =>
   `${banco.jurosMensal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}% a.m.`;
 
-/** Escolhas de crédito no formulário: id do banco → parcelamento. */
 export type EscolhasCredito = Record<number, number>;

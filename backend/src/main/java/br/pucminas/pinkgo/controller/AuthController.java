@@ -31,7 +31,6 @@ public class AuthController {
 		return authService.login(req);
 	}
 
-	/** Sempre 202, exista ou não a conta. */
 	@PostMapping("/esqueci-senha")
 	public ResponseEntity<Void> esqueciSenha(@RequestBody @Valid EsqueciSenhaRequest req) {
 		redefinicaoSenhaService.solicitar(req.email());

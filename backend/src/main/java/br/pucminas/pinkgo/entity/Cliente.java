@@ -25,7 +25,6 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Cliente {
 
-	/** Limite do enunciado: rendimentos auferidos, no máximo 3. */
 	public static final int MAX_RENDIMENTOS = 3;
 
 	@Id
@@ -51,7 +50,6 @@ public class Cliente {
 	@Column(nullable = false, unique = true)
 	private String email;
 
-	/** Hash BCrypt, nunca a senha em texto. */
 	@Column(nullable = false)
 	private String senha;
 
@@ -74,7 +72,6 @@ public class Cliente {
 		return Collections.unmodifiableList(rendimentos);
 	}
 
-	/** Substitui todos os rendimentos, respeitando o mínimo de 1 e o máximo de 3. */
 	public void definirRendimentos(List<Rendimento> novos) {
 		if (novos.isEmpty()) throw new RegraDeNegocioException("rendimentos", "Informe pelo menos um rendimento.");
 		if (novos.size() > MAX_RENDIMENTOS)

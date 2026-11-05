@@ -1,6 +1,5 @@
 import type { SVGProps } from "react";
 
-/* Ícones exportados do Figma (componentes "Icone/*"), viewBox 32x32, cor via currentColor. */
 const paths = {
   seta: [
     "M15.3693 9.22486C15.762 8.90451 16.341 8.92711 16.7072 9.29322L26.7072 19.2932C27.0975 19.6838 27.0976 20.3168 26.7072 20.7073C26.3167 21.0977 25.6836 21.0976 25.2931 20.7073L16.0001 11.4143L6.70716 20.7073C6.31668 21.0977 5.68361 21.0976 5.2931 20.7073C4.9026 20.3168 4.90265 19.6838 5.2931 19.2932L15.2931 9.29322L15.3693 9.22486Z",
@@ -143,9 +142,7 @@ export type IconName = keyof typeof paths;
 
 type IconProps = Omit<SVGProps<SVGSVGElement>, "children"> & {
   name: IconName;
-  /** Tamanho em px (largura e altura). */
   size?: number;
-  /** Rotação em graus. A "seta" aponta para cima; 180 = para baixo. */
   rotate?: 0 | 90 | 180 | 270;
 };
 

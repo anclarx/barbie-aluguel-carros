@@ -46,7 +46,6 @@ import br.pucminas.pinkgo.repository.PedidoRepository;
 @ExtendWith(MockitoExtension.class)
 class PedidoServiceTest {
 
-	/** "Hoje" fixo: 12/01/2027, então a primeira retirada aceita é 13/01. */
 	private static final LocalDate HOJE = LocalDate.of(2027, 1, 12);
 
 	@Mock
@@ -92,7 +91,6 @@ class PedidoServiceTest {
 		when(modeloRepository.existsById(10L)).thenReturn(true);
 		when(localRepository.findById(1L)).thenReturn(Optional.of(bh));
 		when(automovelRepository.travarDoModeloNoLocal(10L, 1L)).thenReturn(List.of(automovel));
-		// lenient: nos testes de validação o pedido é recusado antes de ser salvo.
 		lenient().when(pedidoRepository.save(any(Pedido.class))).thenAnswer(i -> i.getArgument(0));
 	}
 
@@ -196,7 +194,6 @@ class PedidoServiceTest {
 		PedidoResponse editado = service.editar(1L, 5L, edicao(HOJE.plusDays(3), true, new PropostaRequest(7L, 12)));
 		assertThat(editado.propostas().getFirst().status()).isEqualTo(StatusProposta.APROVADA);
 
-		// Outro parcelamento é outra proposta: volta para análise.
 		editado = service.editar(1L, 5L, edicao(HOJE.plusDays(3), true, new PropostaRequest(7L, 18)));
 		assertThat(editado.propostas().getFirst().status()).isEqualTo(StatusProposta.EM_ANALISE);
 	}
@@ -285,7 +282,6 @@ class PedidoServiceTest {
 	void editarMantemOAutomovelAtualQuandoEleSegueLivre() {
 		pedidoExistente();
 		Automovel outro = automovelComId("MAT-2", "PNK-0002", 2L);
-		// O outro vem primeiro na lista, mas o do pedido tem preferência.
 		when(automovelRepository.travarDoModeloNoLocal(10L, 1L)).thenReturn(List.of(outro, automovel));
 
 		PedidoResponse editado = service.editar(1L, 5L,
@@ -300,7 +296,6 @@ class PedidoServiceTest {
 		ReflectionTestUtils.setField(automovel, "id", 1L);
 		Automovel outro = automovelComId("MAT-2", "PNK-0002", 2L);
 		when(automovelRepository.travarDoModeloNoLocal(10L, 1L)).thenReturn(List.of(automovel, outro));
-		// Os dias do próprio pedido (id 5) não contam; outro pedido ocupa o carro atual nas novas datas.
 		when(pedidoRepository.automovelOcupado(eq(1L), any(), any(), eq(5L))).thenReturn(true);
 
 		PedidoResponse editado = service.editar(1L, 5L,
@@ -319,7 +314,6 @@ class PedidoServiceTest {
 		Pedido pedido = Pedido.criar(cliente, automovel, bh, bh, HOJE.plusDays(1), HOJE.plusDays(3), false, HOJE);
 		ReflectionTestUtils.setField(pedido, "id", 5L);
 		when(pedidoRepository.findById(5L)).thenReturn(Optional.of(pedido));
-		// lenient: nem todo teste chega a conferir o automóvel (cancelar, pedido de outro cliente).
 		lenient().when(automovelRepository.travarDoModeloNoLocal(10L, 1L)).thenReturn(List.of(automovel));
 		return pedido;
 	}

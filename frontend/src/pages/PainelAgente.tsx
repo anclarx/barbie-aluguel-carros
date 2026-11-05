@@ -26,7 +26,6 @@ const textosSituacao: Record<Situacao, string> = {
   historico: "Encerrados, cancelados ou negados.",
 };
 
-/** Como está o crédito do pedido, em poucas palavras, para a coluna "Liquidação". */
 function liquidacao(pedido: Pedido) {
   if (!pedido.comCredito) return "Sem crédito";
   const escolhida = propostaEscolhida(pedido);
@@ -77,10 +76,6 @@ function ItemPedidoAgente({ item, onAnalisar }: { item: PedidoAgente; onAnalisar
   );
 }
 
-/**
- * Painel do agente da PinkGo: a "Meus aluguéis" de quem recebe os pedidos. Ele analisa a renda de cada cliente, dá
- * o parecer (depois da resposta dos bancos e da escolha do cliente) e acompanha os contratos.
- */
 export function PainelAgente() {
   const { agente } = useAuth();
   const [situacao, setSituacao] = useState<Situacao>("analise");
@@ -91,7 +86,6 @@ export function PainelAgente() {
 
   const visiveis = pedidos.dados?.itens ?? [];
 
-  // Os bancos respondem sozinhos em uns 30 segundos: enquanto algum não respondeu, a lista se atualiza.
   const esperandoBancos = aguardandoBancos(visiveis.map((i) => i.pedido));
   const recarregarPedidos = pedidos.recarregar;
   useEffect(() => {
@@ -102,7 +96,6 @@ export function PainelAgente() {
 
   if (!agente) return null;
 
-  // Depois de um parecer, a lista e as contagens mudam juntas.
   const recarregar = () => {
     pedidos.recarregar();
     resumo.recarregar();

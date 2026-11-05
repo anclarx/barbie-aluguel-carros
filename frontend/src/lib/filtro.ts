@@ -22,7 +22,6 @@ export const filtroVazio: FiltroState = {
   precoMax: "",
 };
 
-/** Lista vazia = sem restrição naquele grupo. */
 export function aplicarFiltro(modelos: Modelo[], f: FiltroState) {
   return modelos.filter(
     (m) =>

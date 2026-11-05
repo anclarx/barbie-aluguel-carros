@@ -3,7 +3,6 @@ import { cn } from "../../lib/cn";
 
 type Props = { titulo: string; descricao?: string; acao?: ReactNode; className?: string };
 
-/** Caixa para lista vazia ou erro de carregamento, com uma ação opcional (ex.: "Tentar de novo"). */
 export function EmptyState({ titulo, descricao, acao, className }: Props) {
   return (
     <div

@@ -33,9 +33,7 @@ class EmailNotificacaoServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		// lenient: o teste do HTML não chega a montar a mensagem.
 		lenient().when(sender.createMimeMessage()).thenReturn(new MimeMessage((Session) null));
-		// Executor que roda na hora, para o teste ver o envio sem esperar outra thread.
 		service = new EmailNotificacaoService(sender, "pinkgo@exemplo.com", Runnable::run);
 	}
 

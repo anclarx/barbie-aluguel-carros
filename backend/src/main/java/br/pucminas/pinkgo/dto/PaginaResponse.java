@@ -5,7 +5,6 @@ import java.util.function.Function;
 
 import org.springframework.data.domain.Page;
 
-/** Página estável para a API, em vez de serializar o `Page` do Spring Data. `pagina` começa em 1. */
 public record PaginaResponse<T>(List<T> itens, int pagina, int tamanho, long total, int totalPaginas) {
 
 	public static <E, T> PaginaResponse<T> de(Page<E> page, Function<E, T> mapear) {

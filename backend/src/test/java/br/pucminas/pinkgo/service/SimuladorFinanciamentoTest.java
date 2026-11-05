@@ -13,7 +13,6 @@ class SimuladorFinanciamentoTest {
 
 	private static final BigDecimal TOTAL = new BigDecimal("22000.00");
 
-	/** Cenário do resumo no Figma: aluguel de R$ 22.000,00, entrada de 10%, 1,49% a.m. e 18 parcelas. */
 	@Test
 	void simulaComTabelaPrice() {
 		Banco banco = new Banco("Banco Aurora", new BigDecimal("1.49"), 18, new BigDecimal("10"));

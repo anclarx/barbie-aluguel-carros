@@ -15,9 +15,7 @@ const larguras: Record<Largura, string> = {
 type ModalProps = {
   open: boolean;
   onClose: () => void;
-  /** Linha pequena acima do título (ex.: "Novo pedido · Etapa 1 de 2"). */
   context?: string;
-  /** Selo à esquerda do título (ex.: status do pedido). */
   selo?: ReactNode;
   title: string;
   width?: Largura;

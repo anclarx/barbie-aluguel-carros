@@ -17,11 +17,9 @@ import { Modal } from "../ui/Modal";
 type Props = {
   item: PedidoAgente | null;
   onClose: () => void;
-  /** Depois de um parecer, a lista e as contagens do painel recarregam. */
   onAlterado: () => void;
 };
 
-/** Regra interna da PinkGo: o aluguel (ou a parcela) pode ocupar até metade da renda mensal. */
 const LIMITE_RENDA = 50;
 
 const sucesso: Record<AcaoAgente, string> = {
@@ -31,7 +29,6 @@ const sucesso: Record<AcaoAgente, string> = {
   encerramento: "Contrato encerrado",
 };
 
-/** Linha de apoio de "Respostas dos bancos", conforme a etapa do crédito. */
 const recadoBancos: Record<EtapaCredito, string> = {
   "sem-credito": "",
   "bancos-analisando": "Os bancos respondem em instantes.",
@@ -40,7 +37,6 @@ const recadoBancos: Record<EtapaCredito, string> = {
   "banco-escolhido": "O cliente já escolheu o banco. Agora o parecer é seu.",
 };
 
-/** CPF com o começo e o fim escondidos: ***.482.917-** */
 const cpfParcial = (cpf: string) => {
   const d = cpf.replace(/\D/g, "");
   return d.length === 11 ? `***.${d.slice(3, 6)}.${d.slice(6, 9)}-**` : cpf;
@@ -48,16 +44,11 @@ const cpfParcial = (cpf: string) => {
 
 const percentual = (n: number) => `${n.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`;
 const loja = (l: Local) => `${l.cidade} · ${l.bairro}`;
-/** "24/11 → 31/12/2026": o ano aparece uma vez quando as duas datas são do mesmo ano. */
 const periodo = (inicio: string, fim: string) =>
   inicio.slice(0, 4) === fim.slice(0, 4)
     ? `${formatData(inicio).slice(0, 5)} → ${formatData(fim)}`
     : `${formatData(inicio)} → ${formatData(fim)}`;
 
-/**
- * Quanto o aluguel pesa por mês: com financiamento escolhido, a parcela; sem, o total do aluguel (até 30 dias) ou a
- * parte de um mês dele (aluguéis mais longos).
- */
 function equivalenteMensal(pedido: Pedido) {
   const escolhida = propostaEscolhida(pedido);
   if (escolhida) return escolhida.simulacao.valorParcela;
@@ -88,7 +79,6 @@ function Dado({ rotulo, valor }: { rotulo: string; valor: ReactNode }) {
   );
 }
 
-/** Rótulo à esquerda e valor à direita, como os rendimentos do cliente. */
 function Linha({ rotulo, valor }: { rotulo: string; valor: ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-12 text-label-medium">
@@ -107,7 +97,6 @@ function Total({ rotulo, valor }: { rotulo: string; valor: string }) {
   );
 }
 
-/** Resposta de um banco: a simulação completa quando aprovou, o motivo quando negou. */
 function CartaoBanco({ proposta, apagado }: { proposta: Proposta; apagado: boolean }) {
   const { banco, simulacao: s } = proposta;
   const aprovada = proposta.status === "APROVADA";
@@ -157,11 +146,6 @@ function CartaoBanco({ proposta, apagado }: { proposta: Proposta; apagado: boole
   );
 }
 
-/**
- * Análise financeira do pedido pelo agente da PinkGo (Figma, "Modal análise financeira v2"): quem é o cliente e quanto
- * ganha, o carro e o período, quanto o aluguel pesa na renda, o tipo de contrato e as respostas dos bancos. O parecer
- * favorável só sai depois dos bancos e da escolha do cliente.
- */
 export function AnalisePedidoModal({ item, onClose, onAlterado }: Props) {
   if (!item) return null;
   return <Conteudo key={item.pedido.id} item={item} onClose={onClose} onAlterado={onAlterado} />;

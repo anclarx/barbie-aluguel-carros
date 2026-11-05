@@ -25,7 +25,6 @@ import br.pucminas.pinkgo.repository.PedidoRepository;
 import br.pucminas.pinkgo.repository.TokenRedefinicaoSenhaRepository;
 import br.pucminas.pinkgo.validation.Documentos;
 
-/** CRUD de clientes: cadastro (US01) e perfil (US07). */
 @Service
 @Transactional
 public class ClienteService {
@@ -60,10 +59,6 @@ public class ClienteService {
 		return ClienteResponse.de(clienteRepository.save(cliente));
 	}
 
-	/**
-	 * Cada etapa do cadastro confere os seus dados antes de deixar avançar: e-mail na primeira, CPF e RG na segunda.
-	 * Só os campos enviados são conferidos; o primeiro repetido responde 409 com o campo.
-	 */
 	@Transactional(readOnly = true)
 	public void verificarCadastro(VerificacaoCadastroRequest req) {
 		if (preenchido(req.email())) garantirEmailLivre(normalizarEmail(req.email()));
@@ -71,7 +66,6 @@ public class ClienteService {
 		if (preenchido(req.rg())) garantirRgLivre(rg(req.rg()));
 	}
 
-	// O login é um só para clientes e agentes, então o e-mail não pode repetir entre eles.
 	private void garantirEmailLivre(String email) {
 		if (clienteRepository.existsByEmailIgnoreCase(email) || agenteRepository.existsByEmailIgnoreCase(email))
 			throw new ConflitoException("email", "Já existe uma conta com este e-mail.");
@@ -119,11 +113,9 @@ public class ClienteService {
 		cliente.setProfissao(req.profissao().trim());
 		cliente.setEmail(email);
 		cliente.definirRendimentos(paraEntidades(req.rendimentos()));
-		// O flush grava os rendimentos novos agora, para a resposta já sair com os ids gerados.
 		return ClienteResponse.de(clienteRepository.saveAndFlush(cliente));
 	}
 
-	/** US07: a conta não pode ser excluída com contrato em execução. Pedidos em aberto são cancelados antes. */
 	public void excluir(Long id) {
 		Cliente cliente = cliente(id);
 		if (pedidoRepository.existsByClienteIdAndStatus(id, StatusPedido.CONTRATO_EM_EXECUCAO))
@@ -140,7 +132,6 @@ public class ClienteService {
 				.orElseThrow(() -> new RecursoNaoEncontradoException("Cliente não encontrado."));
 	}
 
-	/** RG só com dígitos (e X); os formatos variam por estado, então só exige um tamanho mínimo. */
 	private static String rg(String valor) {
 		String rg = Documentos.rg(valor);
 		if (rg.length() < 5 || rg.length() > 14) throw new RegraDeNegocioException("rg", "RG inválido.");

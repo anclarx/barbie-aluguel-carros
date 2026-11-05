@@ -13,7 +13,6 @@ import br.pucminas.pinkgo.service.EmailNotificacaoService;
 import br.pucminas.pinkgo.service.LogNotificacaoService;
 import br.pucminas.pinkgo.service.NotificacaoService;
 
-/** Escolhe como as mensagens saem: por e-mail, quando o SMTP está no .env, ou só no log. */
 @Configuration
 public class NotificacaoConfig {
 
@@ -34,14 +33,12 @@ public class NotificacaoConfig {
 		sender.setDefaultEncoding("UTF-8");
 		Properties smtp = sender.getJavaMailProperties();
 		smtp.put("mail.smtp.auth", "true");
-		// 465 é SMTP com SSL desde o início; as outras portas (587) começam abertas e sobem para TLS.
 		if (email.port() == 465) smtp.put("mail.smtp.ssl.enable", "true");
 		else smtp.put("mail.smtp.starttls.enable", "true");
 		smtp.put("mail.smtp.connectiontimeout", TEMPO_LIMITE_MS);
 		smtp.put("mail.smtp.timeout", TEMPO_LIMITE_MS);
 		smtp.put("mail.smtp.writetimeout", TEMPO_LIMITE_MS);
 		log.info("E-mails de redefinição de senha saem por {} como {}.", email.host(), email.remetente());
-		// Fora da requisição: o "esqueci a senha" responde na hora, exista ou não a conta, sem esperar o SMTP.
 		return new EmailNotificacaoService(sender, email.remetente(), Executors.newVirtualThreadPerTaskExecutor());
 	}
 }

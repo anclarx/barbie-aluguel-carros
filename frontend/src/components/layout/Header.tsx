@@ -7,7 +7,6 @@ import { Button } from "../ui/Button";
 import { Icon, type IconName } from "../ui/Icon";
 import { Logo } from "../ui/Logo";
 
-/** Mesmo hover do botão com borda (secondary): fundo rosa claro. */
 const botaoIcone = "flex size-40 items-center justify-center rounded-full transition-colors hover:bg-brand-pink-soft";
 
 const itemNav =(ativo: boolean) =>
@@ -40,7 +39,6 @@ function MenuPerfil() {
   if (!usuario) return null;
 
   return (
-    // flex: sem ele, o botão inline-flex herda a altura da linha de texto e fica 3px acima dos outros itens.
     <div ref={ref} className="relative flex">
       <button type="button" aria-expanded={aberto} onClick={() => setAberto((v) => !v)} className={itemNav(aberto)}>
         <Icon name="usuario" size={24} />
@@ -53,7 +51,6 @@ function MenuPerfil() {
             <span className="text-body-bold">{usuario.nome}</span>
             <span className="text-caption-semibold text-neutral-secondary">{usuario.email}</span>
           </div>
-          {/* Agentes não têm cadastro pelo site, então não há dados para editar. */}
           {cliente && (
             <Link
               to="/perfil"
@@ -82,7 +79,6 @@ function MenuPerfil() {
   );
 }
 
-/** `variant="auth"` esconde navegação e botões (telas de login e cadastro). */
 export function Header({ variant = "default" }: { variant?: "default" | "auth" }) {
   const { cliente, agente } = useAuth();
   const navigate = useNavigate();

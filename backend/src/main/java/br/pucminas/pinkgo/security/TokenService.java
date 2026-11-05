@@ -10,7 +10,6 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
-/** Emite o JWT do login. O `sub` é o id do usuário (cliente ou agente) e `papel` diz qual dos dois. */
 @Service
 public class TokenService {
 
@@ -18,7 +17,6 @@ public class TokenService {
 	}
 
 	private static final String EMISSOR = "pinkgo";
-	/** Claim com o Papel de quem logou. */
 	public static final String CLAIM_PAPEL = "papel";
 
 	private final JwtEncoder encoder;

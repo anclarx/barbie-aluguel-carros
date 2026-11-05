@@ -90,7 +90,6 @@ type SelectFieldProps = SelectHTMLAttributes<HTMLSelectElement> & {
   error?: string;
   placeholder?: string;
   options: Array<{ value: string; label: string }>;
-  /** Ícone à esquerda do valor, como o de localização nas lojas. */
   icon?: IconName;
 };
 
@@ -116,7 +115,6 @@ export function SelectField({ label, error, className, id, placeholder, options,
             </option>
           ))}
         </select>
-        {/* Depois do select para ficar por cima do fundo branco dele. */}
         {icon && (
           <Icon
             name={icon}

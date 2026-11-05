@@ -5,10 +5,6 @@ import java.util.List;
 
 import br.pucminas.pinkgo.entity.Modelo;
 
-/**
- * Cartão da vitrine e modal "Detalhes do carro". Nunca inclui a placa (US16). `disponiveis` é quantos automóveis
- * do modelo estão livres no período buscado; fica nulo quando a busca não tem período.
- */
 public record ModeloResponse(Long id, String marca, String nome, Integer ano, BigDecimal diaria, String cambio,
 		String combustivel, Integer assentos, Integer portas, String seguro, String portaMalas, String carroceria,
 		String imagemUrl, List<String> fotos, Long disponiveis) {

@@ -26,12 +26,10 @@ const textosSituacao: Record<Situacao, string> = {
 };
 
 const podeEditar = (s: StatusPedido) => s === "EM_ANALISE_FINANCEIRA" || s === "APROVADO";
-// Mesma regra da API (StatusPedido.MODIFICAVEIS): contrato em execução não se cancela (US06).
 const podeCancelar = podeEditar;
 
 type Acoes = { onDetalhes: () => void; onEditar: () => void; onCancelar: () => void; onEscolher: () => void };
 
-/** Recado do crédito na linha do pedido em análise: o que os bancos responderam e o que falta o cliente fazer. */
 const recadoCredito: Partial<Record<EtapaCredito, { texto: string; destaque?: boolean }>> = {
   "bancos-analisando": { texto: "Os bancos estão analisando o crédito…" },
   "nenhum-aprovou": { texto: "Nenhum banco aprovou: siga sem financiamento ou cancele.", destaque: true },
@@ -44,7 +42,6 @@ function ItemPedido({ pedido, onDetalhes, onEditar, onCancelar, onEscolher }: { 
   const etapa = etapaCredito(pedido);
   const emAnalise = pedido.status === "EM_ANALISE_FINANCEIRA";
   const recado = emAnalise ? recadoCredito[etapa] : undefined;
-  // Bancos responderam: o cliente escolhe um deles ou segue sem financiamento.
   const precisaEscolher = emAnalise && (etapa === "escolher-banco" || etapa === "nenhum-aprovou");
   return (
     <li className="flex items-center gap-24 rounded-lg border border-neutral-border bg-neutral-white px-24 py-16">
@@ -77,7 +74,6 @@ function ItemPedido({ pedido, onDetalhes, onEditar, onCancelar, onEscolher }: { 
       />
       <Info rotulo="Diária" valor={formatBRL(modelo.diaria)} />
       <Info rotulo="Total" valor={formatBRL(pedido.totalEstimado)} />
-      {/* Com financiamento para escolher, o botão fica em cima, na largura das outras ações (Figma, "Frame 52"). */}
       <div className="ml-auto flex flex-col gap-12">
         {precisaEscolher && (
           <Button variant="secondary" onClick={onEscolher}>
@@ -115,7 +111,6 @@ export function MeusPedidos() {
   const resumo = useResumoPedidos();
   const pedidos = usePedidos({ status: statusDaSituacao(situacao), pagina, tamanho: POR_PAGINA });
 
-  // Depois de criar, editar ou cancelar, a lista e as contagens mudam juntas.
   const recarregar = () => {
     pedidos.recarregar();
     resumo.recarregar();
@@ -124,7 +119,6 @@ export function MeusPedidos() {
   const visiveis = pedidos.dados?.itens ?? [];
   const totalPaginas = pedidos.dados?.totalPaginas ?? 1;
 
-  // Os bancos respondem sozinhos em uns 30 segundos: enquanto algum não respondeu, a lista se atualiza.
   const esperandoBancos = aguardandoBancos(visiveis);
   const recarregarPedidos = pedidos.recarregar;
   useEffect(() => {

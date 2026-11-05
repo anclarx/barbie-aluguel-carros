@@ -9,7 +9,6 @@ import java.lang.annotation.Target;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
-/** CPF com dígitos verificadores válidos. Aceita com ou sem pontuação. */
 @Documented
 @Constraint(validatedBy = CpfValidator.class)
 @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT })

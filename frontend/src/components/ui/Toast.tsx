@@ -4,25 +4,18 @@ import type { DadosToast, TipoToast } from "../../context/toastContext";
 import { cn } from "../../lib/cn";
 import { Icon, type IconName } from "./Icon";
 
-/** O cartão é sempre branco; a cor do tipo aparece só no selo do ícone e na barra de tempo. */
 const estilos: Record<TipoToast, { selo: string; barra: string; icone: IconName }> = {
   sucesso: { selo: "bg-brand-pink-soft text-brand-primary", barra: "bg-brand-primary", icone: "check" },
   erro: { selo: "bg-status-danger-bg text-status-danger-text", barra: "bg-status-danger-text", icone: "fechar" },
   info: { selo: "bg-status-info-bg text-status-info-text", barra: "bg-status-info-text", icone: "seloVerificado" },
 };
 
-/** Quantos cartões aparecem empilhados; os outros esperam escondidos atrás. */
 const VISIVEIS = 3;
-/** Quanto cada cartão de trás aparece acima do da frente, e o espaço entre eles com a pilha aberta. */
 const DEGRAU = 10;
 const ESPACO = 8;
 
 type PilhaProps = { toasts: DadosToast[]; onFechar: (id: number) => void };
 
-/**
- * Pilha de avisos no canto inferior direito. Fechada, mostra o mais novo na frente e as bordas dos
- * anteriores atrás dele; com o mouse (ou o foco) em cima, abre em lista e pausa o tempo de todos.
- */
 export function PilhaToasts({ toasts, onFechar }: PilhaProps) {
   const [aberta, setAberta] = useState(false);
   const [alturas, setAlturas] = useState<Record<number, number>>({});
@@ -30,14 +23,12 @@ export function PilhaToasts({ toasts, onFechar }: PilhaProps) {
     setAlturas((a) => (a[id] === altura ? a : { ...a, [id]: altura }));
   }, []);
 
-  // Mais novo primeiro: é ele que fica na frente.
   const ordem = [...toasts].reverse();
   const alturaFrente = ordem[0] ? (alturas[ordem[0].id] ?? 0) : 0;
   const deslocamentos = ordem.map((_, i) =>
     ordem.slice(0, i).reduce((soma, t) => soma + (alturas[t.id] ?? 0) + ESPACO, 0),
   );
   const alturaAberta = ordem.length ? deslocamentos[ordem.length - 1] + (alturas[ordem[ordem.length - 1].id] ?? 0) : 0;
-  // Sem avisos, a área some e não pode ficar "aberta" esperando um mouseleave que não vem.
   const expandida = aberta && ordem.length > 0;
 
   return createPortal(
@@ -81,7 +72,6 @@ function ItemToast({ toast, posicao, aberta, deslocamento, alturaFrente, onMedir
   const { id, tipo, titulo, descricao, icone, saindo } = toast;
   const estilo = estilos[tipo];
   const conteudo = useRef<HTMLDivElement>(null);
-  // Erro fica mais tempo na tela: costuma pedir alguma ação.
   const duracao = tipo === "erro" ? 8000 : 5000;
   const restante = useRef(duracao);
   const naFrente = posicao === 0;
@@ -95,7 +85,6 @@ function ItemToast({ toast, posicao, aberta, deslocamento, alturaFrente, onMedir
     return () => observador.disconnect();
   }, [id, onMedir]);
 
-  // Conta o tempo só enquanto ninguém está lendo a pilha; ao pausar, guarda o que falta.
   useEffect(() => {
     if (aberta || saindo) return;
     const inicio = Date.now();
@@ -118,7 +107,6 @@ function ItemToast({ toast, posicao, aberta, deslocamento, alturaFrente, onMedir
       )}
       style={{
         zIndex: 100 - posicao,
-        // Atrás da frente, o cartão fica com a altura dela para só a borda de cima aparecer.
         height: atras && alturaFrente ? alturaFrente : undefined,
         transform: `translate(${saindo ? 24 : 0}px, ${-deslocamento}px) scale(${escala})`,
       }}
@@ -147,7 +135,6 @@ function ItemToast({ toast, posicao, aberta, deslocamento, alturaFrente, onMedir
         >
           <Icon name="fechar" size={16} />
         </button>
-        {/* Tempo que falta para o aviso sumir; para junto com o timer quando a pilha está aberta. */}
         <span
           aria-hidden
           className={cn(

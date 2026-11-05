@@ -8,9 +8,7 @@ export type DadosToast = {
   tipo: TipoToast;
   titulo: string;
   descricao?: string;
-  /** Troca o ícone padrão do tipo (check, fechar, selo). */
   icone?: IconName;
-  /** Marcado ao fechar, para a animação de saída rodar antes de remover. */
   saindo?: boolean;
 };
 
@@ -20,11 +18,6 @@ export type ToastState = {
   sucesso: Mostrar;
   erro: Mostrar;
   info: Mostrar;
-  /**
-   * Um aviso de erro para cada mensagem que o formulário mostra embaixo dos campos, empilhados na ordem dos campos.
-   * O título de cada aviso é o rótulo do campo em `rotulos`, ou `titulo` quando o campo não está lá. Valores
-   * `undefined` são ignorados.
-   */
   camposInvalidos: (
     erros: Record<string, string | undefined>,
     titulo?: string,

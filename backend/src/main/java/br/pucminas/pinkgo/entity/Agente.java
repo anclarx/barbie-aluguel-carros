@@ -11,11 +11,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * Agente da PinkGo, que avalia os pedidos do ponto de vista financeiro, decide o tipo de contrato e acompanha o
- * contrato. Os bancos parceiros não têm agente: respondem sozinhos às propostas de crédito. Não há cadastro de agentes
- * pelo site; eles vêm da carga inicial (DataLoader e dados-iniciais.json).
- */
 @Entity
 @Table(name = "agentes")
 @Getter
@@ -32,7 +27,6 @@ public class Agente {
 	@Column(nullable = false, unique = true)
 	private String email;
 
-	/** Hash BCrypt. */
 	@Column(nullable = false)
 	private String senha;
 
@@ -46,7 +40,6 @@ public class Agente {
 		return new Agente(nome, email, senha);
 	}
 
-	/** Usado pela carga inicial quando o login fixo do agente muda de endereço. */
 	public void trocarEmail(String novoEmail) {
 		this.email = novoEmail;
 	}

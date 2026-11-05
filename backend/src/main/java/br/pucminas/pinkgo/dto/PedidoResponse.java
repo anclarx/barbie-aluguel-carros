@@ -15,7 +15,6 @@ public record PedidoResponse(Long id, String codigo, ModeloResponse modelo, Auto
 		TipoContrato tipoContrato, String bancoAssociado, List<PropostaResponse> propostas, String justificativaParecer,
 		String pendenciaParaAprovar) {
 
-	/** A placa só aparece dentro do pedido, nunca na vitrine. */
 	public record AutomovelReservado(Long id, String matricula, String placa) {
 
 		static AutomovelReservado de(Automovel a) {

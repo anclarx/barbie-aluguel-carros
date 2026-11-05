@@ -33,7 +33,6 @@ class PoliticaCreditoTest {
 
 	@Test
 	void celesteSoContaRendaComVinculoFormal() {
-		// R$ 8.000 de renda, mas só R$ 2.000 é CLT: abaixo dos R$ 3.000 que o Celeste exige.
 		List<Rendimento> rendimentos = List.of(renda(TipoRendimento.EMPREGO_CLT_PUBLICO, "2000"),
 				renda(TipoRendimento.AUTONOMO, "6000"));
 
@@ -45,7 +44,6 @@ class PoliticaCreditoTest {
 	void parcelaNaoPodePassarDoComprometimentoMaximo() {
 		List<Rendimento> rendimentos = List.of(renda(TipoRendimento.EMPREGO_CLT_PUBLICO, "10000"));
 
-		// Aurora aceita até 30% da renda: R$ 3.000 passa, R$ 3.100 não.
 		assertThat(PoliticaCredito.AURORA.avaliar(rendimentos, simulacao("20000", "3000")).aprovada()).isTrue();
 		var negada = PoliticaCredito.AURORA.avaliar(rendimentos, simulacao("20000", "3100"));
 		assertThat(negada.aprovada()).isFalse();

@@ -27,10 +27,8 @@ function Bloco({ titulo, icon, children }: { titulo: string; icon: IconName; chi
   );
 }
 
-/** O servidor guarda CPF e RG só com dígitos; na tela eles aparecem com máscara. */
 const formatar = (c: Cliente): Cliente => ({ ...c, cpf: mascaraCpf(c.cpf), rg: mascaraRg(c.rg) });
 
-/** "Meu perfil" > "Editar dados cadastrais" (US07). */
 export function Perfil() {
   const { cliente, atualizarCliente, sair } = useAuth();
   const navigate = useNavigate();

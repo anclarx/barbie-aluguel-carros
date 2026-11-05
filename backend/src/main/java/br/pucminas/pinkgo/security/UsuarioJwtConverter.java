@@ -13,10 +13,6 @@ import org.springframework.stereotype.Component;
 import br.pucminas.pinkgo.repository.AgenteRepository;
 import br.pucminas.pinkgo.repository.ClienteRepository;
 
-/**
- * Transforma o JWT na autenticação do Spring: o `papel` vira a role e o usuário precisa existir. Um token de uma
- * conta excluída (ou de um banco de dados recriado) responde 401, e o front leva a pessoa de volta ao login.
- */
 @Component
 public class UsuarioJwtConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
@@ -37,7 +33,6 @@ public class UsuarioJwtConverter implements Converter<Jwt, AbstractAuthenticatio
 		return new JwtAuthenticationToken(jwt, List.of(new SimpleGrantedAuthority(papel.role())), jwt.getSubject());
 	}
 
-	/** Tokens emitidos antes dos agentes existirem não têm `papel`: eram todos de clientes. */
 	private static Papel papel(Jwt jwt) {
 		String valor = jwt.getClaimAsString(TokenService.CLAIM_PAPEL);
 		try {

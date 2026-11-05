@@ -8,7 +8,6 @@ import { ROTULOS_CAMPOS } from "../lib/rotulosCampos";
 import { authService } from "../services/authService";
 import { ApiError, mensagemDeErro } from "../services/http";
 
-/** Página aberta pelo link do e-mail de "esqueci a senha" (`/redefinir-senha?token=...`). */
 export function RedefinirSenha() {
   const navigate = useNavigate();
   const toast = useToast();
@@ -31,7 +30,6 @@ export function RedefinirSenha() {
       await authService.redefinirSenha(token, senha.nova);
       setConcluido(true);
     } catch (falha) {
-      // Link vencido ou já usado vem como erro do campo `token`.
       const doLink = falha instanceof ApiError ? falha.erros.token : undefined;
       setErros(doLink ? { link: doLink } : { nova: mensagemDeErro(falha) });
       toast.erro(doLink ? "Link inválido" : "Não foi possível salvar a senha", doLink ?? mensagemDeErro(falha));

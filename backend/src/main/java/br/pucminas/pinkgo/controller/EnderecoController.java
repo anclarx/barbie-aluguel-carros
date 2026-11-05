@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import br.pucminas.pinkgo.dto.EnderecoSugestao;
 import br.pucminas.pinkgo.service.EnderecoService;
 
-/** Sugestões de endereço residencial para o cadastro (público, porque o cadastro acontece antes do login). */
 @RestController
 @RequestMapping("/api/enderecos")
 public class EnderecoController {

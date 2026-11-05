@@ -11,7 +11,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/** Loja da PinkGo onde o automóvel é retirado ou devolvido. Não é o endereço do cliente. */
 @Entity
 @Table(name = "locais", uniqueConstraints = @UniqueConstraint(columnNames = { "bairro", "cidade", "uf" }))
 @Getter
@@ -28,7 +27,6 @@ public class Local {
 	@Column(nullable = false)
 	private String cidade;
 
-	/** Sigla, como "MG". */
 	@Column(nullable = false, length = 2)
 	private String uf;
 
@@ -38,7 +36,6 @@ public class Local {
 		this.uf = uf;
 	}
 
-	/** "Belo Horizonte - MG · Savassi": cidade primeiro, que é como a pessoa procura na lista. */
 	public String getDescricao() {
 		return cidade + " - " + uf + " · " + bairro;
 	}

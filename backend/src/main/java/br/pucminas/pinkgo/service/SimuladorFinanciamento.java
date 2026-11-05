@@ -6,10 +6,6 @@ import java.math.RoundingMode;
 
 import br.pucminas.pinkgo.entity.Banco;
 
-/**
- * Simulação do financiamento do aluguel com parcelas fixas (tabela Price), a mesma conta mostrada no modal:
- * entrada mínima do banco, saldo financiado e parcela = saldo × i × (1+i)ⁿ / ((1+i)ⁿ − 1).
- */
 public final class SimuladorFinanciamento {
 
 	private static final MathContext PRECISAO = MathContext.DECIMAL64;

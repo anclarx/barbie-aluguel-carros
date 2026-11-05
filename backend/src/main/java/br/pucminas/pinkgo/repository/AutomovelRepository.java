@@ -14,11 +14,6 @@ import jakarta.persistence.LockModeType;
 
 public interface AutomovelRepository extends JpaRepository<Automovel, Long> {
 
-	/*
-	 * Os automóveis ficam travados até o fim da transação. Um segundo pedido simultâneo para o mesmo modelo espera
-	 * aqui e, quando confere os pedidos depois, já enxerga o primeiro: os dois não ficam com o mesmo carro.
-	 */
-
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("select a from Automovel a where a.modelo.id = :modeloId and a.local.id = :localId order by a.id")
 	List<Automovel> travarDoModeloNoLocal(@Param("modeloId") Long modeloId, @Param("localId") Long localId);
@@ -27,7 +22,6 @@ public interface AutomovelRepository extends JpaRepository<Automovel, Long> {
 	@Query("select a from Automovel a where a.modelo.id = :modeloId order by a.id")
 	List<Automovel> travarDoModelo(@Param("modeloId") Long modeloId);
 
-	/** Quantos automóveis de cada modelo, no local (ou em todos), estão livres no período, preparação incluída. */
 	@Query("""
 			select a.modelo.id as modeloId, count(a) as livres from Automovel a
 			where (:localId is null or a.local.id = :localId)

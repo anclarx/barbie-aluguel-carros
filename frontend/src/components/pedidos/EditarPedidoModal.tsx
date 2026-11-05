@@ -13,7 +13,6 @@ import { SecaoAutomovelReservado, SecaoLiquidacao, SecaoLocalPeriodo, SecaoModel
 
 type Props = { pedido: Pedido | null; onClose: () => void; onAlterado: () => void };
 
-/** Modal "Editar pedido" (US05): lojas, período, forma de liquidação e bancos, com a análise de cada banco. */
 export function EditarPedidoModal({ pedido, onClose, onAlterado }: Props) {
   if (!pedido) return null;
   return <Conteudo key={pedido.id} pedido={pedido} onClose={onClose} onAlterado={onAlterado} />;
@@ -55,7 +54,6 @@ function Conteudo({ pedido, onClose, onAlterado }: Props & { pedido: Pedido }) {
       });
       onAlterado();
       onClose();
-      // Aprovado que muda volta para análise; em análise continua lá.
       toast.sucesso("Pedido atualizado", `O pedido #${pedido.codigo} segue em análise financeira com as novas escolhas.`);
     } catch (e) {
       setErro(mensagemDeErro(e));

@@ -15,10 +15,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * Link de "esqueci a senha". Só o hash SHA-256 do token fica salvo: quem lê o banco não consegue usar o link.
- * Vale uma vez e por pouco tempo.
- */
 @Entity
 @Table(name = "tokens_redefinicao_senha")
 @Getter

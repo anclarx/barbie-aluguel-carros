@@ -15,11 +15,6 @@ import br.pucminas.pinkgo.entity.PropostaCredito;
 import br.pucminas.pinkgo.repository.PropostaCreditoRepository;
 import br.pucminas.pinkgo.service.PoliticaCredito.Resultado;
 
-/**
- * Resposta dos bancos às propostas de crédito. Não há agente de banco: cada proposta é avaliada pela política do
- * banco ({@link PoliticaCredito}) depois de `pinkgo.bancos.tempo-resposta` (30 s), como se o banco levasse esse
- * tempo para analisar. Quem chama de tempos em tempos é o {@link AnaliseCreditoAgendada}.
- */
 @Service
 public class AnaliseCreditoService {
 
@@ -36,13 +31,11 @@ public class AnaliseCreditoService {
 		this.tempoResposta = tempoResposta;
 	}
 
-	/** Responde todas as propostas que já esperaram o tempo do banco. Devolve quantas foram respondidas. */
 	@Transactional
 	public int responderPendentes() {
 		return responderPendentes(clock.instant());
 	}
 
-	/** Como {@link #responderPendentes()}, com o "agora" informado (os testes adiantam o relógio). */
 	@Transactional
 	public int responderPendentes(Instant agora) {
 		List<PropostaCredito> pendentes = propostaRepository.findAguardandoResposta(agora.minus(tempoResposta));

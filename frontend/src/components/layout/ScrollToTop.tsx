@@ -1,10 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router";
 
-/**
- * Ao trocar de página, volta ao topo em vez de manter a rolagem da página anterior.
- * Links com âncora (ex.: "/#faq" no rodapé) rolam até a seção.
- */
 export function ScrollToTop() {
   const { pathname, hash } = useLocation();
 

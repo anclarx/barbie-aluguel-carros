@@ -26,10 +26,6 @@ import br.pucminas.pinkgo.repository.AgenteRepository;
 import br.pucminas.pinkgo.repository.PedidoRepository;
 import br.pucminas.pinkgo.repository.PedidoRepository.ContagemPorStatus;
 
-/**
- * Painel do agente da PinkGo: todos os pedidos, o parecer da análise financeira e o contrato. Os bancos não têm
- * agente; respondem sozinhos às propostas (AnaliseCreditoService).
- */
 @Service
 @Transactional(readOnly = true)
 public class AgenteService {
@@ -49,7 +45,6 @@ public class AgenteService {
 		return AgenteResponse.de(agente(id));
 	}
 
-	/** `pagina` começa em 1. Sem `status`, traz todos. */
 	public PaginaResponse<PedidoAgenteResponse> listarPedidos(Long agenteId, Collection<StatusPedido> status,
 			int pagina, int tamanho) {
 		agente(agenteId);
@@ -70,8 +65,6 @@ public class AgenteService {
 		long total = porStatus.values().stream().mapToLong(Long::longValue).sum();
 		return new ResumoPedidosResponse(total, porStatus);
 	}
-
-	/* Parecer da análise financeira e contrato. */
 
 	@Transactional
 	public PedidoAgenteResponse aprovar(Long pedidoId, String justificativa, TipoContrato tipoContrato) {

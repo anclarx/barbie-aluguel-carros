@@ -20,7 +20,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-/** Modelo de carro da vitrine. Os automóveis físicos (com placa) ficam em {@link Automovel}. */
 @Entity
 @Table(name = "modelos")
 @Getter
@@ -63,7 +62,6 @@ public class Modelo {
 	@Builder.Default
 	private List<String> fotos = new ArrayList<>();
 
-	/** Copia os dados de vitrine de outro modelo (o da carga inicial), mantendo o id e os automóveis. */
 	public void atualizarCom(Modelo dados) {
 		marca = dados.marca;
 		ano = dados.ano;
@@ -76,7 +74,6 @@ public class Modelo {
 		portaMalas = dados.portaMalas;
 		carroceria = dados.carroceria;
 		imagemUrl = dados.imagemUrl;
-		// Mexer na lista faz o Hibernate regravá-la inteira; só troca quando as fotos mudaram.
 		if (!fotos.equals(dados.fotos)) {
 			fotos.clear();
 			fotos.addAll(dados.fotos);

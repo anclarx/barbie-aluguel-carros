@@ -11,7 +11,6 @@ public enum StatusPedido {
 	CANCELADO,
 	CONTRATO_ENCERRADO;
 
-	/** Status em que o cliente ainda pode editar ou cancelar o pedido (US05, US06). */
 	public static final Set<StatusPedido> MODIFICAVEIS = EnumSet.of(EM_ANALISE_FINANCEIRA, APROVADO);
 
 	public boolean modificavel() {

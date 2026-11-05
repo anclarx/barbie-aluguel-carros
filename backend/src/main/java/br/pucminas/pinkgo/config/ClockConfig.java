@@ -6,7 +6,6 @@ import java.time.ZoneId;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** "Hoje" no fuso de Brasília, injetável para os testes poderem fixar a data. */
 @Configuration
 public class ClockConfig {
 

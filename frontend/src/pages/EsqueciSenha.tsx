@@ -25,7 +25,6 @@ export function EsqueciSenha() {
     setErro("");
     setEnviando(true);
     try {
-      // A resposta é a mesma exista ou não a conta, para não revelar quais e-mails estão cadastrados.
       await authService.esqueciSenha(email);
       setEnviado(true);
     } catch (falha) {

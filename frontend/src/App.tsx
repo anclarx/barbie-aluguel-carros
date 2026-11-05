@@ -14,7 +14,6 @@ import { RedefinirSenha } from "./pages/RedefinirSenha";
 
 function App() {
   return (
-    // Os avisos ficam por fora: até o AuthProvider usa um quando a sessão expira.
     <ToastProvider>
       <AuthProvider>
         <BrowserRouter>

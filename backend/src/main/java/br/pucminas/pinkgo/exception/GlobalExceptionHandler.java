@@ -10,17 +10,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-/**
- * Erros da API no formato RFC 9457 (ProblemDetail). Erros ligados a campos vêm em `erros`
- * ({"cpf": "CPF inválido."}), para o front mostrar a mensagem embaixo de cada campo.
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	ProblemDetail validacao(MethodArgumentNotValidException ex) {
 		Map<String, String> erros = new LinkedHashMap<>();
-		// `rendimentos[0].valorMensal` vira `rendimentos`: o front mostra um aviso só para a lista.
 		ex.getBindingResult().getFieldErrors()
 				.forEach(e -> erros.putIfAbsent(e.getField().replaceAll("\\[.*", ""), e.getDefaultMessage()));
 		return problema(HttpStatus.BAD_REQUEST, "Confira os campos destacados.", erros);

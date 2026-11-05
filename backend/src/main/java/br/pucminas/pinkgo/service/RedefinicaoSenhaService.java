@@ -21,10 +21,6 @@ import br.pucminas.pinkgo.exception.RegraDeNegocioException;
 import br.pucminas.pinkgo.repository.ClienteRepository;
 import br.pucminas.pinkgo.repository.TokenRedefinicaoSenhaRepository;
 
-/**
- * "Esqueci a senha": manda um link com token aleatório e, com ele, troca a senha. O token vale 30 minutos e uma vez
- * só. A resposta é a mesma exista ou não a conta, para ninguém descobrir quais e-mails estão cadastrados.
- */
 @Service
 @Transactional
 public class RedefinicaoSenhaService {
@@ -72,7 +68,6 @@ public class RedefinicaoSenhaService {
 		registro.usar(agora);
 	}
 
-	/** 256 bits aleatórios, em Base64 que pode ir na URL. */
 	private String novoToken() {
 		byte[] bytes = new byte[BYTES_TOKEN];
 		aleatorio.nextBytes(bytes);

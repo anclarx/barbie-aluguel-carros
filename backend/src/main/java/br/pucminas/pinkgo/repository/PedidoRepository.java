@@ -30,8 +30,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 	@Query("select p.status as status, count(p) as total from Pedido p where p.cliente.id = :clienteId group by p.status")
 	List<ContagemPorStatus> contarPorStatus(@Param("clienteId") Long clienteId);
 
-	/* Painel do agente da PinkGo: todos os pedidos. */
-
 	@EntityGraph(attributePaths = { "cliente", "modelo", "automovel", "localRetirada", "localDevolucao" })
 	@Query("select p from Pedido p where (:todosStatus = true or p.status in :status)")
 	Page<Pedido> findParaEmpresa(@Param("todosStatus") boolean todosStatus,
@@ -40,7 +38,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 	@Query("select p.status as status, count(p) as total from Pedido p group by p.status")
 	List<ContagemPorStatus> contarTodosPorStatus();
 
-	/** Algum pedido, fora `ignorarPedidoId`, impede o automóvel no período? Veja a regra em {@link Disponibilidade}. */
 	@Query("""
 			select count(p) > 0 from Pedido p
 			where p.automovel.id = :automovelId and p.id <> :ignorarPedidoId and """ + Disponibilidade.CONFLITO)

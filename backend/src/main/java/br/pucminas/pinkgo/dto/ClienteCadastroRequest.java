@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
-/** US01: cadastro em 3 passos (acesso, dados e renda) enviado de uma vez. */
 public record ClienteCadastroRequest(
 		@NotBlank(message = "Informe seu nome completo.") String nome,
 		@NotBlank(message = "Informe seu CPF.") @Cpf String cpf,

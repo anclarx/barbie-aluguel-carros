@@ -8,7 +8,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-/** Injeta o id do usuário autenticado (cliente ou agente), lido do `sub` do JWT: `@UsuarioLogado Long clienteId`. */
 @Documented
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

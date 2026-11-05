@@ -14,7 +14,6 @@ public interface LocalRepository extends JpaRepository<Local, Long> {
 
 	List<Local> findAllByOrderByCidadeAscBairroAsc();
 
-	/** Lojas que têm o modelo na frota, sem olhar datas. */
 	@Query("""
 			select l from Local l
 			where exists (select 1 from Automovel a where a.local = l and a.modelo.id = :modeloId)
@@ -22,7 +21,6 @@ public interface LocalRepository extends JpaRepository<Local, Long> {
 			""")
 	List<Local> findComModelo(@Param("modeloId") Long modeloId);
 
-	/** Lojas com pelo menos um automóvel do modelo livre no período, preparação incluída. */
 	@Query("""
 			select l from Local l
 			where exists (

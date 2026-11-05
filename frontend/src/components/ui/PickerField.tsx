@@ -3,7 +3,6 @@ import { cn } from "../../lib/cn";
 import { formatData } from "../../lib/format";
 import { Icon, type IconName } from "./Icon";
 
-/* Campos da busca da Início (Figma "Início - Sem Login"): caixa de 54px, ícone de 20px a 12px do texto. */
 const caixa =
   "relative flex h-54 w-full items-center gap-12 rounded-md border border-neutral-border px-16 text-body-medium text-neutral-text focus-within:border-brand-primary";
 
@@ -36,7 +35,6 @@ export function PickerSelect({ label, error, icon, placeholder, options, id, ...
     <Moldura label={label} htmlFor={inputId} error={error}>
       <div className={cn(caixa, error && "border-status-danger-text")}>
         <Icon name={icon} size={20} className="pointer-events-none shrink-0" />
-        {/* O select ocupa a caixa toda, com espaço para os ícones dos dois lados. */}
         <select
           id={inputId}
           className="absolute inset-0 cursor-pointer appearance-none truncate bg-transparent pr-48 pl-48 outline-none"
@@ -63,10 +61,6 @@ type PickerDateProps =Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "valu
   value: string;
 };
 
-/**
- * Data com o texto "Data" enquanto vazia, como no Figma. O input nativo fica invisível por cima da caixa:
- * ele continua cuidando do calendário, do teclado e do `min`.
- */
 export function PickerDate({ label, error, id, value, ...props }: PickerDateProps) {
   const autoId = useId();
   const inputId = id ?? autoId;
@@ -80,11 +74,9 @@ export function PickerDate({ label, error, id, value, ...props }: PickerDateProp
           type="date"
           value={value}
           onClick={(e) => {
-            // Abre o calendário ao clicar em qualquer parte da caixa (o navegador pode recusar sem gesto do usuário).
             try {
               e.currentTarget.showPicker();
             } catch {
-              /* sem suporte: o input continua editável pelo teclado */
             }
           }}
           className="absolute inset-0 cursor-pointer opacity-0"

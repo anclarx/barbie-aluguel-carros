@@ -6,9 +6,7 @@ export type Etapa = { label: string; icon: IconName };
 
 type StepperProps = {
   etapas: Etapa[];
-  /** Índice da etapa atual. As anteriores aparecem concluídas. */
   atual: number;
-  /** "horizontal": ícone ao lado do texto (pedido). "vertical": texto abaixo do ícone (cadastro). */
   layout?: "horizontal" | "vertical";
 };
 

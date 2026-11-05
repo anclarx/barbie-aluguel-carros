@@ -10,7 +10,6 @@ import { Icon } from "../ui/Icon";
 
 type Props = { rendimentos: Rendimento[]; onChange: (rendimentos: Rendimento[]) => void };
 
-/** Lista de 1 a 3 rendimentos com campos por categoria e renda mensal total. */
 export function RendimentosEditor({ rendimentos, onChange }: Props) {
   const tipos = useTiposRendimento().dados ?? [];
   const atualizar = (id: number, parcial: Partial<Rendimento>) =>

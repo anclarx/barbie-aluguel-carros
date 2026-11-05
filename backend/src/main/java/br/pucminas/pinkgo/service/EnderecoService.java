@@ -20,13 +20,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import br.pucminas.pinkgo.dto.EnderecoSugestao;
 import br.pucminas.pinkgo.exception.ServicoIndisponivelException;
 
-/**
- * Autocomplete de endereço residencial com dados do OpenStreetMap, via Photon (photon.komoot.io). O Nominatim, a
- * busca oficial do OSM, proíbe autocomplete; o Photon foi feito para isso.
- *
- * A chamada passa pelo back-end para identificar a aplicação no User-Agent (exigido pela política de uso), restringir
- * a busca ao Brasil e guardar as respostas recentes, poupando o serviço gratuito.
- */
 @Service
 public class EnderecoService {
 
@@ -34,7 +27,6 @@ public class EnderecoService {
 	public record EnderecosProperties(String url, String userAgent) {
 	}
 
-	/** Retângulo que cobre o Brasil: oeste, sul, leste, norte. */
 	private static final String BBOX_BRASIL = "-74,-34,-34,6";
 	private static final int MINIMO_CARACTERES = 3;
 	private static final int SUGESTOES = 5;
@@ -42,7 +34,6 @@ public class EnderecoService {
 
 	private final RestClient photon;
 
-	/** Últimas buscas, para não repetir a mesma requisição enquanto várias pessoas digitam o mesmo começo. */
 	private final Map<String, List<EnderecoSugestao>> cache = Collections.synchronizedMap(
 			new LinkedHashMap<>(16, 0.75f, true) {
 				@Override
@@ -52,7 +43,6 @@ public class EnderecoService {
 			});
 
 	public EnderecoService(EnderecosProperties propriedades) {
-		// Sem resposta rápida, a pessoa segue digitando o endereço à mão.
 		SimpleClientHttpRequestFactory fabrica = new SimpleClientHttpRequestFactory();
 		fabrica.setConnectTimeout(Duration.ofSeconds(3));
 		fabrica.setReadTimeout(Duration.ofSeconds(5));
@@ -68,7 +58,6 @@ public class EnderecoService {
 		String chave = termo.toLowerCase(Locale.ROOT);
 		List<EnderecoSugestao> guardado = cache.get(chave);
 		if (guardado != null) return guardado;
-		// Fora do lock: buscas diferentes não esperam umas pelas outras. Falhas não entram no cache.
 		List<EnderecoSugestao> sugestoes = consultar(termo);
 		cache.put(chave, sugestoes);
 		return sugestoes;
@@ -87,7 +76,6 @@ public class EnderecoService {
 		}
 	}
 
-	/** Abreviações comuns de logradouro, que o Photon não entende ("av paulista" → "avenida paulista"). */
 	private static final Map<String, String> ABREVIACOES = Map.of("av", "avenida", "r", "rua", "al", "alameda",
 			"tv", "travessa", "pc", "praça", "pca", "praça", "rod", "rodovia", "est", "estrada", "lgo", "largo");
 
@@ -97,7 +85,6 @@ public class EnderecoService {
 				.toList());
 	}
 
-	/** Mantém só endereços do Brasil e tira os repetidos (o OSM divide uma rua em trechos, um por CEP). */
 	static List<EnderecoSugestao> converter(PhotonResposta resposta) {
 		if (resposta == null || resposta.features() == null) return List.of();
 		Map<String, EnderecoSugestao> unicos = new LinkedHashMap<>();
@@ -114,7 +101,6 @@ public class EnderecoService {
 	}
 
 	static EnderecoSugestao sugestao(PhotonResposta.Propriedades p) {
-		// Em ruas, `name` é o próprio logradouro; em prédios e lugares, a rua vem em `street`.
 		String logradouro = p.street() != null ? p.street() : p.name();
 		String bairro = p.district() != null ? p.district() : p.locality();
 		String uf = Estados.uf(p.state());
@@ -126,7 +112,6 @@ public class EnderecoService {
 		return new EnderecoSugestao(descricao, logradouro, p.housenumber(), bairro, p.city(), uf, p.postcode());
 	}
 
-	/** Formato GeoJSON do Photon; só os campos usados, o resto é ignorado. */
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	record PhotonResposta(List<Feature> features) {
 
@@ -140,7 +125,6 @@ public class EnderecoService {
 		}
 	}
 
-	/** Nome do estado (como vem do OSM) para a sigla. */
 	static final class Estados {
 
 		private static final Map<String, String> SIGLAS = Map.ofEntries(Map.entry("Acre", "AC"),

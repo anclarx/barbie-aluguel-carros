@@ -13,10 +13,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * Um carro da frota, parado numa loja. Não guarda se está "livre": isso depende do período, e é calculado pelos
- * pedidos ativos que usam o carro (veja PedidoRepository.automovelOcupado).
- */
 @Entity
 @Table(name = "automoveis")
 @Getter

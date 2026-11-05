@@ -1,6 +1,5 @@
 package br.pucminas.pinkgo.entity;
 
-/** Categorias de rendimento. `campo` é o rótulo do campo extra que a categoria pede no cadastro, quando pede. */
 public enum TipoRendimento {
 	EMPREGO_CLT_PUBLICO("Emprego formal (CLT / Servidor público)", "Nome empresa"),
 	PJ_MEI("Pessoa jurídica (PJ / MEI)", "Razão social"),

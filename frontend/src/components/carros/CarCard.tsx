@@ -8,9 +8,7 @@ import { CarCaracteristicas, TituloModelo } from "./CarSpecs";
 
 const INTERVALO_FOTOS_MS = 1500;
 
-/** Foto do cartão que passa para as outras variações de cor enquanto o mouse está em cima (como na loja da Barbie). */
 function GaleriaHover({ modelo, hover }: { modelo: Modelo; hover: boolean }) {
-  // Cada foto é uma variação de cor do modelo; a primeira é a principal (`imagemUrl`).
   const galeria = modelo.fotos.length ? modelo.fotos : [modelo.imagemUrl];
   const [atual, setAtual] = useState(0);
 
@@ -38,7 +36,6 @@ function GaleriaHover({ modelo, hover }: { modelo: Modelo; hover: boolean }) {
           />
         ))}
       </div>
-      {/* Um ponto por variação; com uma foto só, não há o que indicar. */}
       {galeria.length > 1 && (
         <div className="flex justify-center px-16">
           <Indicadores total={galeria.length} atual={atual} />
@@ -48,23 +45,17 @@ function GaleriaHover({ modelo, hover }: { modelo: Modelo; hover: boolean }) {
   );
 }
 
-/** Frente e verso ocupam a mesma célula do grid: o cartão fica com a altura do lado mais alto. */
 const face =
   "col-start-1 row-start-1 flex flex-col overflow-hidden rounded-lg border border-neutral-border bg-neutral-white [backface-visibility:hidden]";
 
 type CarCardProps = { modelo: Modelo; onAlugar: () => void };
 
-/**
- * Cartão do carro na vitrine (Início). "Ver detalhes" vira o cartão e mostra no verso as características do modelo,
- * como nos grupos de carros da Localiza; "Esconder detalhes" desvira.
- */
 export function CarCard({ modelo, onAlugar }: CarCardProps) {
   const [hover, setHover] = useState(false);
   const [virado, setVirado] = useState(false);
   const verDetalhes = useRef<HTMLButtonElement>(null);
   const esconderDetalhes = useRef<HTMLButtonElement>(null);
 
-  // O foco acompanha o lado visível, para quem navega pelo teclado não ficar num botão escondido.
   const virar = (paraVerso: boolean) => {
     setVirado(paraVerso);
     requestAnimationFrame(() => (paraVerso ? esconderDetalhes : verDetalhes).current?.focus({ preventScroll: true }));
@@ -102,7 +93,6 @@ export function CarCard({ modelo, onAlugar }: CarCardProps) {
           </div>
         </div>
 
-        {/* Verso: o título e as características do modelo em blocos, como nos grupos de carros da Localiza. */}
         <div
           className={cn(face, "gap-16 px-16 pt-24 pb-16 [transform:rotateY(180deg)]")}
           aria-hidden={!virado}

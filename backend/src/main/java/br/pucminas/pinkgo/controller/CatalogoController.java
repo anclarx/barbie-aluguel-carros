@@ -17,7 +17,6 @@ import br.pucminas.pinkgo.dto.ModeloResponse;
 import br.pucminas.pinkgo.dto.TipoRendimentoResponse;
 import br.pucminas.pinkgo.service.CatalogoService;
 
-/** Rotas públicas, usadas antes do login: vitrine, locais e categorias de rendimento do cadastro. */
 @RestController
 @RequestMapping("/api")
 public class CatalogoController {
@@ -28,7 +27,6 @@ public class CatalogoController {
 		this.catalogoService = catalogoService;
 	}
 
-	/** `retirada` e `entrega` (yyyy-MM-dd) deixam só os modelos com automóvel livre nesses dias. */
 	@GetMapping("/modelos")
 	public List<ModeloResponse> modelos(@RequestParam(required = false) Long localId,
 			@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate retirada,

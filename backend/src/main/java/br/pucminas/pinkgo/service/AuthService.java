@@ -17,10 +17,6 @@ import br.pucminas.pinkgo.repository.ClienteRepository;
 import br.pucminas.pinkgo.security.Papel;
 import br.pucminas.pinkgo.security.TokenService;
 
-/**
- * US02: login com e-mail e senha, para clientes e agentes (empresa ou banco) na mesma tela. A mesma mensagem cobre
- * e-mail inexistente e senha errada.
- */
 @Service
 @Transactional(readOnly = true)
 public class AuthService {

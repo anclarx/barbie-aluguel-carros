@@ -31,7 +31,6 @@ public class Rendimento {
 	@Column(nullable = false, length = 30)
 	private TipoRendimento tipo;
 
-	/** Empresa, razão social, área de atuação ou descrição, conforme o tipo. */
 	private String entidadeEmpregadora;
 
 	@Column(nullable = false, precision = 12, scale = 2)

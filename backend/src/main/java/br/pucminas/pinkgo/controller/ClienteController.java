@@ -19,7 +19,6 @@ import br.pucminas.pinkgo.security.UsuarioLogado;
 import br.pucminas.pinkgo.service.ClienteService;
 import jakarta.validation.Valid;
 
-/** O cadastro é público; o perfil (`/me`) é sempre o do cliente do token. */
 @RestController
 @RequestMapping("/api/clientes")
 public class ClienteController {
@@ -36,7 +35,6 @@ public class ClienteController {
 		return ResponseEntity.created(URI.create("/api/clientes/me")).body(criado);
 	}
 
-	/** Etapas do cadastro: 204 se e-mail, CPF e RG enviados estão livres; 409 com o campo repetido. */
 	@PostMapping("/verificacao")
 	public ResponseEntity<Void> verificar(@RequestBody VerificacaoCadastroRequest req) {
 		clienteService.verificarCadastro(req);

@@ -24,7 +24,6 @@ import br.pucminas.pinkgo.repository.BancoRepository;
 import br.pucminas.pinkgo.repository.LocalRepository;
 import br.pucminas.pinkgo.repository.ModeloRepository;
 
-/** Dados públicos: vitrine (US16), lojas, bancos parceiros e categorias de rendimento. */
 @Service
 @Transactional(readOnly = true)
 public class CatalogoService {
@@ -42,15 +41,10 @@ public class CatalogoService {
 		this.bancoRepository = bancoRepository;
 	}
 
-	/**
-	 * Vitrine (US16). Com `localId`, só modelos que existem naquela loja. Com o período, só os que têm pelo menos um
-	 * automóvel sem pedido ativo naqueles dias; sem ele, todos os da frota.
-	 */
 	public List<ModeloResponse> listarModelos(Long localId, LocalDate retirada, LocalDate entrega) {
 		List<Modelo> modelos = modeloRepository.findNaFrota(localId);
 		if (!periodo(retirada, entrega)) return modelos.stream().map(ModeloResponse::de).toList();
 
-		// Quantos carros de cada modelo atendem o período inteiro; modelo sem nenhum não aparece.
 		Map<Long, Long> livres = automovelRepository.contarLivresPorModelo(localId, retirada, entrega).stream()
 				.collect(Collectors.toMap(LivresPorModelo::getModeloId, LivresPorModelo::getLivres));
 		return modelos.stream()
@@ -65,15 +59,10 @@ public class CatalogoService {
 				.orElseThrow(() -> new RecursoNaoEncontradoException("Modelo não encontrado."));
 	}
 
-	/** Lojas da PinkGo, onde o carro é retirado e devolvido. É uma lista fixa, cadastrada pela empresa. */
 	public List<LocalResponse> listarLocais() {
 		return localRepository.findAllByOrderByCidadeAscBairroAsc().stream().map(LocalResponse::de).toList();
 	}
 
-	/**
-	 * Opções de retirada nos modais de pedido: lojas com o modelo e, com o período, só as que têm um automóvel dele
-	 * livre naqueles dias. A devolução não passa por aqui: pode ser em qualquer loja.
-	 */
 	public List<LocalResponse> listarLocaisDoModelo(Long modeloId, LocalDate retirada, LocalDate entrega) {
 		if (!modeloRepository.existsById(modeloId))
 			throw new RecursoNaoEncontradoException("Modelo não encontrado.");
@@ -83,7 +72,6 @@ public class CatalogoService {
 		return locais.stream().map(LocalResponse::de).toList();
 	}
 
-	/** Período completo e em ordem; com uma das datas faltando, a busca ignora as datas. */
 	private static boolean periodo(LocalDate retirada, LocalDate entrega) {
 		if (retirada == null || entrega == null) return false;
 		if (entrega.isBefore(retirada))
@@ -91,7 +79,6 @@ public class CatalogoService {
 		return true;
 	}
 
-	/** Bancos que financiam o aluguel, do menor juro para o maior. */
 	public List<BancoResponse> listarBancos() {
 		return bancoRepository.findAllByOrderByJurosMensalAscNomeAsc().stream().map(BancoResponse::de).toList();
 	}

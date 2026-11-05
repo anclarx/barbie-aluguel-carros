@@ -13,23 +13,16 @@ import { Spinner } from "../ui/Spinner";
 import { CarCard } from "./CarCard";
 import { Filtros } from "./Filtros";
 
-/** Três linhas de três cartões. */
 const CARROS_POR_PAGINA = 9;
 
 type Props = {
   localId: number;
-  /** Dias da busca: a vitrine só mostra modelos com automóvel livre nesse período. */
   periodo: Periodo;
   onAlugar: (modelo: Modelo) => void;
 };
 
-/**
- * "Explore os veículos disponíveis" depois da busca: carros com automóvel livre no local de retirada durante o período, filtros
- * laterais e paginação. Os filtros rodam no navegador sobre a lista que veio da API.
- */
 export function Vitrine({ localId, periodo, onAlugar }: Props) {
   const { dados: modelos, erro, carregando, recarregar } = useModelos(localId, periodo);
-  // Guardados na sessão: voltando para a Início, a vitrine continua com os mesmos filtros e página.
   const [filtro, setFiltro] = useSessionState(CHAVES_SESSAO.filtroVitrine, filtroVazio);
   const [pagina, setPagina] = useSessionState(CHAVES_SESSAO.paginaVitrine, 1);
 
@@ -38,7 +31,6 @@ export function Vitrine({ localId, periodo, onAlugar }: Props) {
   const paginaAtual = Math.min(pagina, totalPaginas);
   const visiveis = filtrados.slice((paginaAtual - 1) * CARROS_POR_PAGINA, paginaAtual * CARROS_POR_PAGINA);
 
-  // Filtro novo começa da primeira página.
   const filtrar = (f: FiltroState) => {
     setFiltro(f);
     setPagina(1);

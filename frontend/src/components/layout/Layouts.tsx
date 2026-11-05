@@ -3,7 +3,6 @@ import { useAuth } from "../../hooks/useAuth";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 
-/** Páginas com cabeçalho completo e rodapé. */
 export function SiteLayout() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -16,10 +15,6 @@ export function SiteLayout() {
   );
 }
 
-/**
- * Login, cadastro e esqueci minha senha: só o cabeçalho e o formulário num card branco no centro da tela, sem
- * padrão de fundo e sem rodapé, para nada competir com o formulário.
- */
 export function AuthLayout() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -33,10 +28,6 @@ export function AuthLayout() {
   );
 }
 
-/**
- * Bloqueia rotas autenticadas (US02): visitante vai para o login; quem está logado com o outro papel vai para a
- * área dele (agente não abre telas de cliente e vice-versa).
- */
 export function RequireAuth({ para }: { para: "cliente" | "agente" }) {
   const { cliente, agente } = useAuth();
   const location = useLocation();
@@ -46,7 +37,6 @@ export function RequireAuth({ para }: { para: "cliente" | "agente" }) {
   return <Outlet />;
 }
 
-/** A vitrine é do cliente e de quem visita: o agente logado vai direto para o painel dele. */
 export function SemAgente() {
   const { agente } = useAuth();
   return agente ? <Navigate to="/agente" replace /> : <Outlet />;

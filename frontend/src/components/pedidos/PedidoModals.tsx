@@ -11,7 +11,6 @@ import { Button } from "../ui/Button";
 import { Modal } from "../ui/Modal";
 import { AndamentoPedido, ResumoPedido } from "./ResumoPedido";
 
-/** Cabeçalho dos modais de pedido (Figma): selo de status à esquerda e o código acima do título. */
 const cabecalho = (p: Pedido) => ({
   selo: <StatusBadge status={p.status} tamanho="md" />,
   context: `Pedido #${p.codigo}`,
@@ -19,10 +18,8 @@ const cabecalho = (p: Pedido) => ({
 
 type ModalPedidoProps = { pedido: Pedido | null; onClose: () => void };
 
-/** Modais que alteram o pedido avisam a lista para recarregar. */
 type ModalAcaoProps = ModalPedidoProps & { onAlterado: () => void };
 
-/** Modal "Detalhes do pedido" (US04). */
 export function DetalhesPedidoModal({ pedido, onClose }: ModalPedidoProps) {
   return (
     <Modal
@@ -38,7 +35,6 @@ export function DetalhesPedidoModal({ pedido, onClose }: ModalPedidoProps) {
     >
       {pedido && (
         <div className="flex flex-col gap-16">
-          {/* Pedido cancelado não tem mais andamento para acompanhar. */}
           {pedido.status !== "CANCELADO" && (
             <section className="flex flex-col gap-12">
               <h3 className="text-body-medium">
@@ -87,7 +83,6 @@ export function DetalhesPedidoModal({ pedido, onClose }: ModalPedidoProps) {
   );
 }
 
-/** Modal "Cancelar pedido" (US06). */
 export function CancelarPedidoModal({ pedido, onClose, onAlterado }: ModalAcaoProps) {
   if (!pedido) return null;
   return <CancelarConteudo key={pedido.id} pedido={pedido} onClose={onClose} onAlterado={onAlterado} />;
