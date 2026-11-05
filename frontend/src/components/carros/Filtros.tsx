@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { cn } from "../../lib/cn";
 import { filtroVazio, type FiltroState } from "../../lib/filtro";
 import { formatBRL } from "../../lib/format";
+import { valorDaMascaraMoeda } from "../../lib/mascaras";
 import type { Modelo } from "../../types";
 import { Checkbox } from "../ui/Field";
 import { Icon } from "../ui/Icon";
@@ -38,11 +39,41 @@ function Grupo({ titulo, children }: { titulo: string; children: ReactNode }) {
   );
 }
 
-type FiltrosProps = { modelos: Modelo[]; valor: FiltroState; onChange: (f: FiltroState) => void };
+type ChipsProps = { opcoes: string[]; selecionadas: string[]; onToggle: (opcao: string) => void };
+
+/** Botões em pílula de múltipla escolha (marca, tipo de veículo). */
+function Chips({ opcoes, selecionadas, onToggle }: ChipsProps) {
+  return (
+    <div className="flex flex-wrap gap-6">
+      {opcoes.map((opcao) => {
+        const ativo = selecionadas.includes(opcao);
+        return (
+          <button
+            key={opcao}
+            type="button"
+            aria-pressed={ativo}
+            onClick={() => onToggle(opcao)}
+            className={cn(
+              "h-36 rounded-pill border px-16",
+              ativo
+                ? "border-brand-primary bg-brand-primary text-body-bold text-neutral-white"
+                : "border-neutral-border text-body-medium hover:border-brand-pink",
+            )}
+          >
+            {opcao}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+type FiltrosProps ={ modelos: Modelo[]; valor: FiltroState; onChange: (f: FiltroState) => void };
 
 export function Filtros({ modelos, valor, onChange }: FiltrosProps) {
   const set = (parcial: Partial<FiltroState>) => onChange({ ...valor, ...parcial });
   const marcas = [...new Set(modelos.map((m) => m.marca))];
+  const carrocerias = [...new Set(modelos.map((m) => m.carroceria))].sort();
   const anos = modelos.map((m) => m.ano);
   const anoPiso = Math.min(...anos);
   const anoTeto = Math.max(...anos);
@@ -67,27 +98,15 @@ export function Filtros({ modelos, valor, onChange }: FiltrosProps) {
       </div>
 
       <Grupo titulo="Marca">
-        <div className="flex flex-wrap gap-6">
-          {marcas.map((marca) => {
-            const ativo = valor.marcas.includes(marca);
-            return (
-              <button
-                key={marca}
-                type="button"
-                aria-pressed={ativo}
-                onClick={() => set({ marcas: toggle(valor.marcas, marca) })}
-                className={cn(
-                  "h-36 rounded-pill border px-16",
-                  ativo
-                    ? "border-brand-primary bg-brand-primary text-body-bold text-neutral-white"
-                    : "border-neutral-border text-body-medium hover:border-brand-pink",
-                )}
-              >
-                {marca}
-              </button>
-            );
-          })}
-        </div>
+        <Chips opcoes={marcas} selecionadas={valor.marcas} onToggle={(m) => set({ marcas: toggle(valor.marcas, m) })} />
+      </Grupo>
+
+      <Grupo titulo="Tipo de veículo">
+        <Chips
+          opcoes={carrocerias}
+          selecionadas={valor.carrocerias}
+          onToggle={(c) => set({ carrocerias: toggle(valor.carrocerias, c) })}
+        />
       </Grupo>
 
       <Grupo titulo="Câmbio">
@@ -148,14 +167,16 @@ export function Filtros({ modelos, valor, onChange }: FiltrosProps) {
             {(["precoMin", "precoMax"] as const).map((campo, i) => (
               <label key={campo} className="flex flex-1 flex-col gap-4">
                 <span className="text-label-medium text-neutral-secondary">{i === 0 ? "Valor mínimo" : "Valor máximo"}</span>
+                {/* Mesma máscara de reais do placeholder: preenchido (digitando ou pela barra) fica com texto escuro. */}
                 <input
-                  type="number"
-                  min={precoPiso}
-                  max={precoTeto}
+                  type="text"
                   inputMode="numeric"
                   placeholder={formatBRL(i === 0 ? precoPiso : precoTeto)}
-                  value={valor[campo]}
-                  onChange={(e) => set({ [campo]: e.target.value })}
+                  value={valor[campo] ? formatBRL(Number(valor[campo])) : ""}
+                  onChange={(e) => {
+                    const reais = valorDaMascaraMoeda(e.target.value);
+                    set({ [campo]: reais ? String(reais) : "" });
+                  }}
                   className={campoPequeno}
                 />
               </label>

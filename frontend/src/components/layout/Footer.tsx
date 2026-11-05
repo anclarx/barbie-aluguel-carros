@@ -1,12 +1,18 @@
 import { Link } from "react-router";
-import { Icon } from "../ui/Icon";
+import { Icon, type IconName } from "../ui/Icon";
 import { Logo } from "../ui/Logo";
+
+const redes: Array<{ icon: IconName; label: string }> = [
+  { icon: "whatsapp", label: "WhatsApp" },
+  { icon: "instagram", label: "Instagram" },
+  { icon: "linkedin", label: "LinkedIn" },
+];
 
 const colunas = [
   {
     titulo: "Alugue",
     links: [
-      { label: "Explorar os veículos disponíveis", to: "/#veiculos" },
+      { label: "Explorar os veículos disponíveis", to: "/#busca" },
       { label: "Como funciona", to: "/#como-funciona" },
       { label: "Perguntas frequentes", to: "/#faq" },
     ],
@@ -28,15 +34,11 @@ export function Footer() {
         <div className="flex h-full w-295 flex-col justify-between">
           <Logo size="footer" />
           <div className="flex gap-8 text-neutral-text">
-            <a href="#" aria-label="WhatsApp">
-              <Icon name="whatsapp" size={28} />
-            </a>
-            <a href="#" aria-label="Instagram">
-              <Icon name="instagram" size={28} />
-            </a>
-            <a href="#" aria-label="LinkedIn">
-              <Icon name="linkedin" size={28} />
-            </a>
+            {redes.map(({ icon, label }) => (
+              <a key={icon} href="#" aria-label={label} className="transition-colors hover:text-brand-primary">
+                <Icon name={icon} size={28} />
+              </a>
+            ))}
           </div>
         </div>
 
@@ -56,11 +58,16 @@ export function Footer() {
         ))}
 
         <div className="flex h-full flex-col justify-between">
-          <p className="text-body-medium">
+          <div className="flex flex-col">
             <span className="text-body-bold">Fale conosco</span>
-            <br />
-            (31) 92713-0905
-          </p>
+            <a
+              href="tel:+5531927130905"
+              className="inline-flex items-center gap-4 text-body-medium transition-colors hover:text-brand-primary"
+            >
+              <Icon name="telefone" size={20} />
+              (31) 92713-0905
+            </a>
+          </div>
           <p className="text-body-medium">
             ©2026
             <br />

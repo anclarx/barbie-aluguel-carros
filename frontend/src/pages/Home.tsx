@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { CarCard } from "../components/carros/CarCard";
-import { CarDetailsModal } from "../components/carros/CarDetailsModal";
-import { Filtros } from "../components/carros/Filtros";
+import { BuscaAluguel, type Busca } from "../components/carros/BuscaAluguel";
+import { Vitrine } from "../components/carros/Vitrine";
 import { NovoPedidoModal } from "../components/pedidos/NovoPedidoModal";
 import { Button } from "../components/ui/Button";
 import { Icon, type IconName } from "../components/ui/Icon";
-import { useApp } from "../context/AppContext";
-import { modelos } from "../data/mock";
-import { cn } from "../lib/cn";
-import { aplicarFiltro, filtroVazio } from "../lib/filtro";
+import { useAuth } from "../hooks/useAuth";
+import type { ValoresPedido } from "../hooks/useFormularioPedido";
+import { esquecerSessionState, useSessionState } from "../hooks/useSessionState";
+import { useToast } from "../hooks/useToast";
+import { CHAVES_SESSAO } from "../lib/chavesSessao";
+import { esquecerPedidoPendente, lerPedidoPendente } from "../lib/pedidoPendente";
 import type { Modelo } from "../types";
 
 const passos: Array<{ titulo: string; texto: string; icon: IconName }> = [
@@ -27,7 +28,7 @@ const perguntas = [
   {
     pergunta: "Posso alterar ou cancelar um pedido?",
     resposta:
-      "Sim. Enquanto o pedido estiver em análise financeira ou aprovado, você pode editar as datas e a forma de liquidação ou cancelá-lo em Meus pedidos. Um pedido aprovado que for alterado volta para análise.",
+      "Sim. Enquanto o pedido estiver em análise financeira ou aprovado, você pode editar as datas e a forma de liquidação ou cancelá-lo em Meus aluguéis. Um pedido aprovado que for alterado volta para análise.",
   },
   {
     pergunta: "Quais documentos preciso para alugar?",
@@ -35,26 +36,12 @@ const perguntas = [
   },
 ];
 
-function Banner() {
-  return (
-    <section className="relative h-360 overflow-hidden">
-      <img src="/images/banner.png" alt="" className="size-full object-cover" />
-      {(["Anterior", "Próximo"] as const).map((rotulo, i) => (
-        <button
-          key={rotulo}
-          type="button"
-          aria-label={`${rotulo} banner`}
-          className={cn(
-            "absolute top-1/2 flex size-40 -translate-y-1/2 items-center justify-center rounded-full border-2 border-brand-primary text-brand-primary",
-            i === 0 ? "left-64" : "right-64",
-          )}
-        >
-          <Icon name="seta" size={20} rotate={i === 0 ? 270 : 90} />
-        </button>
-      ))}
-    </section>
-  );
-}
+/** Leva até o card de busca e põe o foco no primeiro campo. */
+const irParaBusca = () => {
+  const busca = document.getElementById("busca");
+  busca?.scrollIntoView({ behavior: "smooth", block: "center" });
+  busca?.querySelector("select")?.focus({ preventScroll: true });
+};
 
 function Faq() {
   const [aberta, setAberta] = useState(0);
@@ -81,53 +68,11 @@ function Faq() {
   );
 }
 
-export function Home() {
-  const { cliente } = useApp();
-  const navigate = useNavigate();
-  const [filtro, setFiltro] = useState(filtroVazio);
-  const [detalhes, setDetalhes] = useState<Modelo | null>(null);
-  const [alugar, setAlugar] = useState<Modelo | null>(null);
-
-  const visiveis = aplicarFiltro(modelos, filtro);
-
-  const iniciarAluguel = (modelo: Modelo) => {
-    setDetalhes(null);
-    // Visitante precisa entrar antes de alugar (roteiro de testes, passo 02).
-    if (!cliente) return navigate("/login", { state: { from: "/" } });
-    setAlugar(modelo);
-  };
-
+/** Conteúdo da Início antes da busca: como funciona, destaque e perguntas frequentes. */
+function Apresentacao() {
   return (
     <>
-      <Banner />
-
-      <section id="veiculos" className="mx-auto flex max-w-page flex-col gap-40 py-56">
-        <div className="flex flex-col gap-4">
-          <h1 className="text-heading-bold">Explore os veículos disponíveis para alugar</h1>
-          <p className="text-body-medium">
-            Filtre por marca, características ou preço diário e encontre o companheiro perfeito para a sua próxima viagem.
-          </p>
-        </div>
-        <div className="flex gap-24">
-          <Filtros modelos={modelos} valor={filtro} onChange={setFiltro} />
-          {visiveis.length ? (
-            <div className="grid flex-1 grid-cols-3 content-start gap-24">
-              {visiveis.map((m) => (
-                <CarCard key={m.id} modelo={m} onAlugar={() => iniciarAluguel(m)} onDetalhes={() => setDetalhes(m)} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-1 flex-col items-center justify-center gap-16 rounded-lg border border-neutral-border bg-neutral-white p-40 text-center">
-              <p className="text-body-bold">Nenhum veículo encontrado com esses filtros.</p>
-              <Button variant="secondary" onClick={() => setFiltro(filtroVazio)}>
-                Limpar filtros
-              </Button>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section id="como-funciona" className="flex flex-col items-center gap-32 pt-56">
+      <section id="como-funciona" className="flex flex-col items-center gap-32 pt-80">
         <h2 className="flex items-center gap-8 text-heading-bold">
           Como funciona alugar um veículo na <span className="text-logo-header text-brand-primary">PinkGo</span>
         </h2>
@@ -161,23 +106,82 @@ export function Home() {
             cada momento. Design marcante, acabamento impecável e a liberdade de viver qualquer percurso com personalidade
             de sobra.
           </p>
-          <Button onClick={() => document.getElementById("veiculos")?.scrollIntoView({ behavior: "smooth" })}>
-            Explorar coleção
-          </Button>
+          <Button onClick={irParaBusca}>Explorar coleção</Button>
         </div>
       </section>
 
       <Faq />
+    </>
+  );
+}
 
-      <CarDetailsModal modelo={detalhes} onClose={() => setDetalhes(null)} onAlugar={iniciarAluguel} />
+export function Home() {
+  const { cliente, agente } = useAuth();
+  const navigate = useNavigate();
+  const toast = useToast();
+  // A busca confirmada fica na sessão: voltando de outra página, a vitrine reaparece como estava.
+  const [busca, setBusca] = useSessionState<Busca | null>(CHAVES_SESSAO.busca, null);
+  // Pedido começado antes do login volta aberto, com as mesmas escolhas, quando o cliente chega à Início.
+  const [alugar, setAlugar] = useState<{ modelo: Modelo; valores?: ValoresPedido } | null>(() =>
+    cliente ? lerPedidoPendente() : null,
+  );
+  const acabouDePesquisar = useRef(false);
+
+  // Só desce até os veículos depois de clicar em "Pesquisar", não ao voltar para a Início com a busca guardada.
+  useEffect(() => {
+    if (!busca || !acabouDePesquisar.current) return;
+    acabouDePesquisar.current = false;
+    document.getElementById("veiculos")?.scrollIntoView({ behavior: "smooth" });
+  }, [busca]);
+
+  /** Busca nova (ou Limpar) começa com os filtros laterais e a página zerados. */
+  const trocarBusca = (nova: Busca | null) => {
+    esquecerSessionState(CHAVES_SESSAO.filtroVitrine, CHAVES_SESSAO.paginaVitrine);
+    acabouDePesquisar.current = nova !== null;
+    setBusca(nova);
+  };
+
+  const iniciarAluguel = (modelo: Modelo) => {
+    // Agente não aluga carro: volta para o painel dele.
+    if (agente) return navigate("/agente");
+    // Visitante também abre o pedido; para enviar, o modal leva para entrar ou criar conta.
+    setAlugar({ modelo });
+  };
+
+  return (
+    <>
+      <section aria-label="Busca de veículos">
+        <img src="/images/banner.png" alt="" className="h-338 w-full object-cover object-[50%_30%]" />
+        <div className="px-64">
+          <BuscaAluguel onPesquisar={trocarBusca} onLimpar={() => trocarBusca(null)} />
+        </div>
+      </section>
+
+      {busca ? (
+        // A key recria a vitrine a cada busca; como `trocarBusca` apagou os filtros guardados, ela começa do zero.
+        <Vitrine
+          key={`${busca.localRetiradaId}:${busca.dataRetirada}:${busca.dataDevolucao}`}
+          localId={busca.localRetiradaId}
+          periodo={{ retirada: busca.dataRetirada, entrega: busca.dataDevolucao }}
+          onAlugar={iniciarAluguel}
+        />
+      ) : (
+        <Apresentacao />
+      )}
+
       <NovoPedidoModal
-        open={!!alugar}
-        modeloInicial={alugar}
-        onClose={() => setAlugar(null)}
-        onDetalhes={setDetalhes}
-        onCriado={() => {
+        modelo={alugar?.modelo ?? null}
+        busca={busca}
+        inicial={alugar?.valores}
+        onClose={() => {
+          esquecerPedidoPendente();
           setAlugar(null);
-          navigate("/pedidos");
+        }}
+        onCriado={(pedido) => {
+          esquecerPedidoPendente();
+          setAlugar(null);
+          toast.sucesso("Pedido enviado", `O pedido #${pedido.codigo} do ${pedido.modelo.nome} já está em análise financeira.`);
+          navigate("/alugueis");
         }}
       />
     </>

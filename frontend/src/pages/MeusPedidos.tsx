@@ -1,87 +1,51 @@
-import { useState } from "react";
-import { CarDetailsModal } from "../components/carros/CarDetailsModal";
-import { NovoPedidoModal } from "../components/pedidos/NovoPedidoModal";
-import { CancelarPedidoModal, DetalhesPedidoModal, EditarPedidoModal } from "../components/pedidos/PedidoModals";
+import { useEffect, useState } from "react";
+import { EditarPedidoModal } from "../components/pedidos/EditarPedidoModal";
+import { EscolherFinanciamentoModal } from "../components/pedidos/EscolherFinanciamentoModal";
+import { CancelarPedidoModal, DetalhesPedidoModal } from "../components/pedidos/PedidoModals";
+import { CartoesSituacao, Info } from "../components/pedidos/Situacoes";
 import { StatusBadge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
-import { Icon, type IconName } from "../components/ui/Icon";
+import { EmptyState } from "../components/ui/EmptyState";
 import { Pagination } from "../components/ui/Pagination";
-import { useApp } from "../context/AppContext";
-import { cn } from "../lib/cn";
+import { Spinner } from "../components/ui/Spinner";
+import { usePedidos, useResumoPedidos } from "../hooks/usePedidos";
+import { aguardandoBancos, etapaCredito, propostaEscolhida, type EtapaCredito } from "../lib/credito";
+import { statusDaSituacao, type Situacao } from "../lib/situacoes";
+import { mensagemDeErro } from "../services/http";
 import { diasEntre, formatBRL, formatData } from "../lib/format";
-import type { Modelo, Pedido, StatusPedido } from "../types";
+import type { Pedido, StatusPedido } from "../types";
 
 const POR_PAGINA = 5;
 
-type Situacao = "todos" | "analise" | "aprovados" | "execucao" | "historico";
-
-const situacoes: Array<{ id: Situacao; titulo: string; texto: string; icon: IconName; status?: StatusPedido[] }> = [
-  { id: "todos", titulo: "Todos", texto: "Tudo o que você já pediu na PinkGo.", icon: "colecao" },
-  { id: "analise", titulo: "Em análise", texto: "Aguardando parecer do agente.", icon: "arquivos", status: ["EM_ANALISE_FINANCEIRA"] },
-  { id: "aprovados", titulo: "Aprovados", texto: "Parecer positivo emitido.", icon: "seloVerificado", status: ["APROVADO"] },
-  { id: "execucao", titulo: "Em execução", texto: "Contratos ativos.", icon: "chave", status: ["CONTRATO_EM_EXECUCAO"] },
-  {
-    id: "historico",
-    titulo: "Histórico",
-    texto: "Encerrados, cancelados ou negados.",
-    icon: "calendario",
-    status: ["CONTRATO_ENCERRADO", "CANCELADO", "NEGADO"],
-  },
-];
+const textosSituacao: Record<Situacao, string> = {
+  todos: "Tudo o que você já pediu na PinkGo.",
+  analise: "Aguardando parecer do agente.",
+  aprovados: "Parecer positivo emitido.",
+  execucao: "Contratos ativos.",
+  historico: "Encerrados, cancelados ou negados.",
+};
 
 const podeEditar = (s: StatusPedido) => s === "EM_ANALISE_FINANCEIRA" || s === "APROVADO";
 // O design também mostra "Cancelar" em contrato em execução; regra a confirmar com o professor (guia, US06).
 const podeCancelar = (s: StatusPedido) => podeEditar(s) || s === "CONTRATO_EM_EXECUCAO";
 
-function CardSituacao({
-  situacao,
-  total,
-  ativo,
-  onClick,
-}: {
-  situacao: (typeof situacoes)[number];
-  total: number;
-  ativo: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={ativo}
-      onClick={onClick}
-      className={cn(
-        "relative flex h-170 flex-col overflow-hidden rounded-lg border p-24 text-left",
-        ativo ? "border-brand-primary bg-brand-primary text-neutral-white" : "border-neutral-border bg-neutral-white hover:border-brand-pink",
-      )}
-    >
-      <Icon
-        name={situacao.icon}
-        size={144}
-        className={cn("absolute -top-8 -right-16", ativo ? "text-neutral-white opacity-20" : "text-brand-primary opacity-10")}
-      />
-      <span className="relative text-body-bold">{situacao.titulo}</span>
-      <span className="relative text-display-medium">{total}</span>
-      <span className={cn("relative text-body-medium", ativo ? "text-brand-pink-soft" : "text-neutral-secondary")}>
-        {situacao.texto}
-      </span>
-    </button>
-  );
-}
+type Acoes = { onDetalhes: () => void; onEditar: () => void; onCancelar: () => void; onEscolher: () => void };
 
-function Info({ rotulo, valor }: { rotulo: string; valor: string }) {
-  return (
-    <div className="flex w-100 flex-col">
-      <span className="text-label-medium text-neutral-secondary">{rotulo}</span>
-      <span className="text-body-medium">{valor}</span>
-    </div>
-  );
-}
+/** Recado do crédito na linha do pedido em análise: o que os bancos responderam e o que falta o cliente fazer. */
+const recadoCredito: Partial<Record<EtapaCredito, { texto: string; destaque?: boolean }>> = {
+  "bancos-analisando": { texto: "Os bancos estão analisando o crédito…" },
+  "nenhum-aprovou": { texto: "Nenhum banco aprovou: siga sem financiamento ou cancele.", destaque: true },
+  "banco-escolhido": { texto: "Aguardando o parecer da PinkGo." },
+};
 
-type Acoes = { onDetalhes: () => void; onEditar: () => void; onCancelar: () => void };
-
-function ItemPedido({ pedido, onDetalhes, onEditar, onCancelar }: { pedido: Pedido } & Acoes) {
+function ItemPedido({ pedido, onDetalhes, onEditar, onCancelar, onEscolher }: { pedido: Pedido } & Acoes) {
   const { modelo } = pedido;
   const dias = diasEntre(pedido.dataRetirada, pedido.dataEntrega);
+  const etapa = etapaCredito(pedido);
+  const emAnalise = pedido.status === "EM_ANALISE_FINANCEIRA";
+  const recado = emAnalise ? recadoCredito[etapa] : undefined;
+  // Bancos responderam: o cliente escolhe um deles ou segue sem financiamento.
+  const precisaEscolher = emAnalise && (etapa === "escolher-banco" || etapa === "nenhum-aprovou");
   return (
     <li className="flex items-center gap-24 rounded-lg border border-neutral-border bg-neutral-white px-24 py-16">
       <img src={modelo.imagemUrl} alt={modelo.nome} className="h-108 w-160 object-contain" />
@@ -101,81 +65,108 @@ function ItemPedido({ pedido, onDetalhes, onEditar, onCancelar }: { pedido: Pedi
         <span className="text-label-medium">
           {formatData(pedido.dataRetirada)} → {formatData(pedido.dataEntrega)} · {dias} dias
         </span>
+        {recado && (
+          <span className={recado.destaque ? "text-label-bold text-brand-primary" : "text-label-medium text-neutral-secondary"}>
+            {recado.texto}
+          </span>
+        )}
       </div>
-      <Info rotulo="Liquidação" valor={pedido.comCredito ? "Com crédito" : "Sem crédito"} />
+      <Info
+        rotulo="Liquidação"
+        valor={pedido.comCredito ? (propostaEscolhida(pedido)?.banco.nome ?? "Com crédito") : "Sem crédito"}
+      />
       <Info rotulo="Diária" valor={formatBRL(modelo.diaria)} />
       <Info rotulo="Total" valor={formatBRL(pedido.totalEstimado)} />
-      <div className="ml-auto flex items-center gap-12">
-        <Button variant="secondary" onClick={onDetalhes}>
-          Detalhes
-        </Button>
-        {podeEditar(pedido.status) && (
-          <Button variant="secondary" onClick={onEditar}>
-            Editar
+      {/* Com financiamento para escolher, o botão fica em cima, na largura das outras ações (Figma, "Frame 52"). */}
+      <div className="ml-auto flex flex-col gap-12">
+        {precisaEscolher && (
+          <Button variant="secondary" onClick={onEscolher}>
+            Escolher financiamento
           </Button>
         )}
-        {podeCancelar(pedido.status) && (
-          <Button variant="danger" onClick={onCancelar}>
-            Cancelar
+        <div className="flex items-center gap-12">
+          <Button variant="secondary" onClick={onDetalhes}>
+            Detalhes
           </Button>
-        )}
+          {podeEditar(pedido.status) && (
+            <Button variant="secondary" onClick={onEditar}>
+              Editar
+            </Button>
+          )}
+          {podeCancelar(pedido.status) && (
+            <Button variant="danger" onClick={onCancelar}>
+              Cancelar
+            </Button>
+          )}
+        </div>
       </div>
     </li>
   );
 }
 
 export function MeusPedidos() {
-  const { pedidos } = useApp();
   const [situacao, setSituacao] = useState<Situacao>("todos");
   const [pagina, setPagina] = useState(1);
-  const [novo, setNovo] = useState(false);
-  const [detalhesCarro, setDetalhesCarro] = useState<Modelo | null>(null);
   const [detalhes, setDetalhes] = useState<Pedido | null>(null);
   const [editar, setEditar] = useState<Pedido | null>(null);
   const [cancelar, setCancelar] = useState<Pedido | null>(null);
+  const [escolher, setEscolher] = useState<Pedido | null>(null);
 
-  const doFiltro = (id: Situacao) => {
-    const status = situacoes.find((s) => s.id === id)?.status;
-    return status ? pedidos.filter((p) => status.includes(p.status)) : pedidos;
+  const resumo = useResumoPedidos();
+  const pedidos = usePedidos({ status: statusDaSituacao(situacao), pagina, tamanho: POR_PAGINA });
+
+  // Depois de criar, editar ou cancelar, a lista e as contagens mudam juntas.
+  const recarregar = () => {
+    pedidos.recarregar();
+    resumo.recarregar();
   };
 
-  const lista = doFiltro(situacao);
-  const totalPaginas = Math.max(1, Math.ceil(lista.length / POR_PAGINA));
-  const paginaAtual = Math.min(pagina, totalPaginas);
-  const visiveis = lista.slice((paginaAtual - 1) * POR_PAGINA, paginaAtual * POR_PAGINA);
+  const visiveis = pedidos.dados?.itens ?? [];
+  const totalPaginas = pedidos.dados?.totalPaginas ?? 1;
+
+  // Os bancos respondem sozinhos em uns 30 segundos: enquanto algum não respondeu, a lista se atualiza.
+  const esperandoBancos = aguardandoBancos(visiveis);
+  const recarregarPedidos = pedidos.recarregar;
+  useEffect(() => {
+    if (!esperandoBancos) return;
+    const id = setInterval(recarregarPedidos, 10_000);
+    return () => clearInterval(id);
+  }, [esperandoBancos, recarregarPedidos]);
 
   return (
     <div className="mx-auto flex max-w-page flex-col gap-32 py-48">
-      <div className="flex items-end justify-between">
-        <div className="flex flex-col gap-4">
-          <h1 className="text-heading-bold">Meus pedidos</h1>
-          <p className="text-body-medium">Acompanhe cada etapa, modifique ou cancele enquanto o pedido permitir.</p>
-        </div>
-        <Button icon={<Icon name="adicao" size={20} />} onClick={() => setNovo(true)}>
-          Novo pedido
-        </Button>
+      <div className="flex flex-col gap-4">
+        <h1 className="text-heading-bold">Meus aluguéis</h1>
+        <p className="text-body-medium">Acompanhe cada etapa, modifique ou cancele enquanto o pedido permitir.</p>
       </div>
 
-      <div className="grid grid-cols-5 gap-16">
-        {situacoes.map((s) => (
-          <CardSituacao
-            key={s.id}
-            situacao={s}
-            total={doFiltro(s.id).length}
-            ativo={situacao === s.id}
-            onClick={() => {
-              setSituacao(s.id);
-              setPagina(1);
-            }}
-          />
-        ))}
-      </div>
+      <CartoesSituacao
+        resumo={resumo.dados}
+        textos={textosSituacao}
+        ativa={situacao}
+        onChange={(s) => {
+          setSituacao(s);
+          setPagina(1);
+        }}
+      />
 
       <div className="flex flex-col gap-16">
         <p className="text-body-medium">
           Itens por página: <span className="text-body-bold">{POR_PAGINA}</span>
         </p>
-        {visiveis.length ? (
+        {pedidos.erro && !pedidos.dados ? (
+          <EmptyState
+            titulo="Não conseguimos carregar seus pedidos."
+            descricao={mensagemDeErro(pedidos.erro)}
+            acao={
+              <Button variant="secondary" onClick={recarregar}>
+                Tentar de novo
+              </Button>
+            }
+          />
+        ) : !pedidos.dados ? (
+          <Spinner rotulo="Carregando pedidos…" />
+        ) : visiveis.length ? (
           <ul className="flex flex-col gap-16">
             {visiveis.map((p) => (
               <ItemPedido
@@ -184,38 +175,23 @@ export function MeusPedidos() {
                 onDetalhes={() => setDetalhes(p)}
                 onEditar={() => setEditar(p)}
                 onCancelar={() => setCancelar(p)}
+                onEscolher={() => setEscolher(p)}
               />
             ))}
           </ul>
         ) : (
-          <p className="rounded-lg border border-neutral-border bg-neutral-white p-40 text-center text-body-medium text-neutral-secondary">
-            Nenhum pedido nesta situação.
-          </p>
+          <EmptyState titulo="Nenhum pedido encontrado." />
         )}
       </div>
 
       <div className="flex justify-center">
-        <Pagination pagina={paginaAtual} total={totalPaginas} onChange={setPagina} />
+        <Pagination pagina={pedidos.dados?.pagina ?? pagina} total={totalPaginas} onChange={setPagina} />
       </div>
 
-      <NovoPedidoModal
-        open={novo}
-        onClose={() => setNovo(false)}
-        onDetalhes={setDetalhesCarro}
-        onCriado={() => {
-          setNovo(false);
-          setSituacao("todos");
-          setPagina(1);
-        }}
-      />
-      <CarDetailsModal
-        modelo={detalhesCarro}
-        onClose={() => setDetalhesCarro(null)}
-        onAlugar={() => setDetalhesCarro(null)}
-      />
       <DetalhesPedidoModal pedido={detalhes} onClose={() => setDetalhes(null)} />
-      <EditarPedidoModal pedido={editar} onClose={() => setEditar(null)} />
-      <CancelarPedidoModal pedido={cancelar} onClose={() => setCancelar(null)} />
+      <EditarPedidoModal pedido={editar} onClose={() => setEditar(null)} onAlterado={recarregar} />
+      <CancelarPedidoModal pedido={cancelar} onClose={() => setCancelar(null)} onAlterado={recarregar} />
+      <EscolherFinanciamentoModal pedido={escolher} onClose={() => setEscolher(null)} onAlterado={recarregar} />
     </div>
   );
 }

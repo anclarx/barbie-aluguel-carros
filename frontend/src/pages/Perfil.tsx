@@ -1,11 +1,18 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router";
+import { EnderecoAutocomplete } from "../components/cliente/EnderecoAutocomplete";
 import { RendimentosEditor } from "../components/cliente/RendimentosEditor";
 import { Button } from "../components/ui/Button";
 import { PasswordField, TextField } from "../components/ui/Field";
 import { Icon, type IconName } from "../components/ui/Icon";
 import { Modal } from "../components/ui/Modal";
-import { useApp } from "../context/AppContext";
+import { useAuth } from "../hooks/useAuth";
+import { useResumoPedidos } from "../hooks/usePedidos";
+import { useToast } from "../hooks/useToast";
+import { ROTULOS_CAMPOS } from "../lib/rotulosCampos";
+import { mascaraCpf, mascaraRg } from "../lib/mascaras";
+import { clienteService } from "../services/clienteService";
+import { ApiError, mensagemDeErro } from "../services/http";
 import type { Cliente } from "../types";
 
 function Bloco({ titulo, icon, children }: { titulo: string; icon: IconName; children: ReactNode }) {
@@ -20,29 +27,71 @@ function Bloco({ titulo, icon, children }: { titulo: string; icon: IconName; chi
   );
 }
 
+/** O servidor guarda CPF e RG só com dígitos; na tela eles aparecem com máscara. */
+const formatar = (c: Cliente): Cliente => ({ ...c, cpf: mascaraCpf(c.cpf), rg: mascaraRg(c.rg) });
+
 /** "Meu perfil" > "Editar dados cadastrais" (US07). */
 export function Perfil() {
-  const { cliente, salvarCliente, pedidos, sair } = useApp();
+  const { cliente, atualizarCliente, sair } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState<Cliente>(cliente!);
+  const [form, setForm] = useState<Cliente>(() => formatar(cliente!));
   const [senha, setSenha] = useState({ atual: "", nova: "" });
-  const [salvo, setSalvo] = useState(false);
+  const [erros, setErros] = useState<Record<string, string>>({});
+  const toast = useToast();
+  const [enviando, setEnviando] = useState(false);
   const [excluir, setExcluir] = useState(false);
+  const [erroExclusao, setErroExclusao] = useState("");
 
-  const temContratoAtivo = pedidos.some((p) => p.status === "CONTRATO_EM_EXECUCAO");
+  const temContratoAtivo = (useResumoPedidos().dados?.porStatus.CONTRATO_EM_EXECUCAO ?? 0) > 0;
 
   const campo = (nome: "nome" | "cpf" | "rg" | "endereco" | "profissao" | "email") => ({
     value: form[nome],
+    error: erros[nome],
     onChange: (e: { target: { value: string } }) => {
-      setSalvo(false);
-      setForm((f) => ({ ...f, [nome]: e.target.value }));
+      const mascara = nome === "cpf" ? mascaraCpf : nome === "rg" ? mascaraRg : null;
+      setForm((f) => ({ ...f, [nome]: mascara ? mascara(e.target.value) : e.target.value }));
     },
   });
 
-  const salvar = (e: FormEvent) => {
+  const salvar = async (e: FormEvent) => {
     e.preventDefault();
-    salvarCliente(form);
-    setSalvo(true);
+    setEnviando(true);
+    try {
+      const { nome, cpf, rg, endereco, profissao, email, rendimentos } = form;
+      const atualizado = await clienteService.atualizar({
+        nome,
+        cpf,
+        rg,
+        endereco,
+        profissao,
+        email,
+        rendimentos,
+        ...(senha.nova && { senhaAtual: senha.atual, novaSenha: senha.nova }),
+      });
+      atualizarCliente(atualizado);
+      setForm(formatar(atualizado));
+      setSenha({ atual: "", nova: "" });
+      setErros({});
+      toast.sucesso("Dados atualizados", "Suas alterações foram salvas.");
+    } catch (erro) {
+      const novos = erro instanceof ApiError && Object.keys(erro.erros).length ? erro.erros : { geral: mensagemDeErro(erro) };
+      setErros(novos);
+      toast.camposInvalidos(novos, "Não foi possível salvar", ROTULOS_CAMPOS);
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  const confirmarExclusao = async () => {
+    try {
+      await clienteService.excluir();
+      sair();
+      toast.info("Conta excluída", "Seus dados foram apagados da PinkGo.", "usuario");
+      navigate("/");
+    } catch (erro) {
+      setErroExclusao(mensagemDeErro(erro));
+      toast.erro("Não foi possível excluir a conta", mensagemDeErro(erro));
+    }
   };
 
   return (
@@ -60,6 +109,7 @@ export function Perfil() {
             placeholder="Sua senha atual"
             autoComplete="current-password"
             value={senha.atual}
+            error={erros.senhaAtual}
             onChange={(e) => setSenha((s) => ({ ...s, atual: e.target.value }))}
           />
           <PasswordField
@@ -67,6 +117,7 @@ export function Perfil() {
             placeholder="Nova senha"
             autoComplete="new-password"
             value={senha.nova}
+            error={erros.novaSenha}
             onChange={(e) => setSenha((s) => ({ ...s, nova: e.target.value }))}
           />
         </div>
@@ -75,21 +126,23 @@ export function Perfil() {
       <Bloco titulo="Dados pessoais" icon="livroEnderecos">
         <TextField label="Nome completo" {...campo("nome")} />
         <div className="grid grid-cols-2 gap-12">
-          <TextField label="CPF" {...campo("cpf")} />
+          <TextField label="CPF" inputMode="numeric" {...campo("cpf")} />
           <TextField label="RG" {...campo("rg")} />
         </div>
-        <TextField label="Endereço" {...campo("endereco")} />
+        <EnderecoAutocomplete
+          valor={form.endereco}
+          error={erros.endereco}
+          onChange={(endereco) => setForm((f) => ({ ...f, endereco }))}
+        />
       </Bloco>
 
       <Bloco titulo="Profissão e rendimentos" icon="cofrinho">
         <TextField label="Profissão" {...campo("profissao")} />
         <RendimentosEditor
           rendimentos={form.rendimentos}
-          onChange={(rendimentos) => {
-            setSalvo(false);
-            setForm((f) => ({ ...f, rendimentos }));
-          }}
+          onChange={(rendimentos) => setForm((f) => ({ ...f, rendimentos }))}
         />
+        {erros.rendimentos && <p className="text-label-medium text-status-danger-text">{erros.rendimentos}</p>}
       </Bloco>
 
       <div className="flex items-center justify-between">
@@ -97,11 +150,13 @@ export function Perfil() {
           Excluir conta
         </Button>
         <div className="flex items-center gap-12">
-          {salvo && <span className="text-label-medium text-status-success-text">Alterações salvas.</span>}
+          {erros.geral && <span className="text-label-medium text-status-danger-text">{erros.geral}</span>}
           <Button variant="secondary" onClick={() => navigate(-1)}>
             Cancelar
           </Button>
-          <Button type="submit">Salvar alterações</Button>
+          <Button type="submit" disabled={enviando}>
+            {enviando ? "Salvando…" : "Salvar alterações"}
+          </Button>
         </div>
       </div>
 
@@ -116,16 +171,7 @@ export function Perfil() {
             <Button variant="secondary" onClick={() => setExcluir(false)}>
               Voltar
             </Button>
-            {!temContratoAtivo && (
-              <Button
-                onClick={() => {
-                  sair();
-                  navigate("/");
-                }}
-              >
-                Sim, excluir conta
-              </Button>
-            )}
+            {!temContratoAtivo && <Button onClick={confirmarExclusao}>Sim, excluir conta</Button>}
           </>
         }
       >
@@ -134,6 +180,7 @@ export function Perfil() {
             ? "Você tem um contrato em execução. A conta só pode ser excluída depois que ele for encerrado."
             : "Ao excluir sua conta, seus dados e pedidos deixam de ficar disponíveis. Essa ação não pode ser desfeita."}
         </p>
+        {erroExclusao && <p className="text-label-medium text-status-danger-text">{erroExclusao}</p>}
       </Modal>
     </form>
   );

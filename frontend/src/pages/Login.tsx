@@ -1,63 +1,101 @@
 import { useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
+import { AuthPage } from "../components/layout/AuthPage";
 import { Button } from "../components/ui/Button";
 import { Checkbox, PasswordField, TextField } from "../components/ui/Field";
-import { useApp } from "../context/AppContext";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/useToast";
+import { ROTULOS_CAMPOS } from "../lib/rotulosCampos";
+import { lerPedidoPendente } from "../lib/pedidoPendente";
+import { ApiError, mensagemDeErro } from "../services/http";
 
 export function Login() {
-  const { entrar } = useApp();
+  const { entrar } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [manter, setManter] = useState(true);
-  const [erro, setErro] = useState("");
+  const [erros, setErros] = useState<{ email?: string; senha?: string }>({});
+  const [enviando, setEnviando] = useState(false);
 
-  const enviar = (e: FormEvent) => {
+  const enviar = async (e: FormEvent) => {
     e.preventDefault();
-    if (!/^\S+@\S+\.\S+$/.test(email) || !senha) return setErro("Informe um e-mail válido e sua senha.");
-    entrar(email);
-    navigate((location.state as { from?: string } | null)?.from ?? "/pedidos", { replace: true });
+    const novos = {
+      email: /^\S+@\S+\.\S+$/.test(email) ? undefined : "Informe um e-mail válido.",
+      senha: senha ? undefined : "Informe sua senha.",
+    };
+    setErros(novos);
+    if (novos.email || novos.senha) return toast.camposInvalidos(novos, undefined, ROTULOS_CAMPOS);
+    setEnviando(true);
+    try {
+      const papel = await entrar(email, senha, manter);
+      // Agentes vão para o painel deles; clientes voltam para onde estavam. Quem começou um pedido sem conta (e
+      // pode ter passado pelo cadastro antes) volta para a Início, onde ele reabre; senão, vai para os aluguéis.
+      const voltarPara = (location.state as { from?: string } | null)?.from;
+      const destino =
+        papel !== "CLIENTE" ? "/agente" : (voltarPara ?? (lerPedidoPendente() ? "/" : "/alugueis"));
+      navigate(destino, { replace: true });
+    } catch (erro) {
+      // E-mail ou senha errados aparecem embaixo da senha, sem dizer qual dos dois falhou.
+      const doServidor = erro instanceof ApiError && erro.erros.email ? erro.erros : { senha: mensagemDeErro(erro) };
+      setErros(doServidor);
+      toast.camposInvalidos(doServidor, "Não foi possível entrar");
+      setEnviando(false);
+    }
   };
 
   return (
-    <div className="flex flex-col gap-40 pt-56">
-      <form onSubmit={enviar} noValidate className="flex flex-col gap-32">
-        <div className="flex flex-col gap-4">
-          <h1 className="text-heading-bold">Acesse sua conta ou cadastre-se</h1>
-          <p className="text-body-medium">Informe seu e-mail e sua senha para continuar.</p>
+    <AuthPage
+      titulo="Acesse sua conta ou cadastre-se"
+      descricao="Informe seu e-mail e sua senha para continuar."
+      onSubmit={enviar}
+      rodape={
+        <>
+          <p className="text-body-medium">
+            Ainda não tem conta?{" "}
+            <Link to="/cadastro" className="text-body-link text-brand-primary transition-colors hover:text-brand-primary-hover">
+              Cadastre-se
+            </Link>
+          </p>
+          <p className="text-label-medium text-neutral-secondary">
+            Ao continuar, você concorda com nossos <a href="#" className="underline transition-colors hover:text-neutral-text">Termos de Uso</a> e nossa{" "}
+            <a href="#" className="underline transition-colors hover:text-neutral-text">Política de Privacidade</a>.
+          </p>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-16">
+        <TextField
+          label="E-mail"
+          type="email"
+          placeholder="Seu e-mail"
+          autoComplete="email"
+          value={email}
+          error={erros.email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <PasswordField
+          label="Senha"
+          placeholder="Sua senha"
+          autoComplete="current-password"
+          value={senha}
+          error={erros.senha}
+          onChange={(e) => setSenha(e.target.value)}
+        />
+        <div className="flex items-center justify-between">
+          <Checkbox checked={manter} onChange={(e) => setManter(e.target.checked)}>
+            <span className="text-label-medium">Manter logado</span>
+          </Checkbox>
+          <Link to="/esqueci-senha" className="text-label-medium underline transition-colors hover:text-brand-primary">
+            Esqueceu sua senha?
+          </Link>
         </div>
-        <div className="flex flex-col gap-16">
-          <TextField label="E-mail" type="email" placeholder="Seu e-mail" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <div className="flex flex-col gap-12">
-            <PasswordField label="Senha" placeholder="Sua senha" autoComplete="current-password" value={senha} onChange={(e) => setSenha(e.target.value)} />
-            <div className="flex items-center justify-between">
-              <Checkbox checked={manter} onChange={(e) => setManter(e.target.checked)}>
-                <span className="text-label-medium">Manter logado</span>
-              </Checkbox>
-              <Link to="/esqueci-senha" className="text-label-medium underline hover:text-brand-primary">
-                Esqueceu sua senha?
-              </Link>
-            </div>
-          </div>
-          {erro && <p className="text-label-medium text-status-danger-text">{erro}</p>}
-        </div>
-        <Button type="submit" size="lg" fullWidth>
-          Entrar
-        </Button>
-      </form>
-
-      <p className="text-body-medium">
-        Ainda não tem conta?{" "}
-        <Link to="/cadastro" className="text-body-link text-brand-primary">
-          Cadastre-se
-        </Link>
-      </p>
-
-      <p className="text-body-medium text-justify">
-        Ao continuar, você concorda com nossos <a href="#" className="underline">Termos de Uso</a> e nossa{" "}
-        <a href="#" className="underline">Política de Privacidade</a>.
-      </p>
-    </div>
+      </div>
+      <Button type="submit" size="lg" fullWidth disabled={enviando}>
+        {enviando ? "Entrando…" : "Entrar"}
+      </Button>
+    </AuthPage>
   );
 }

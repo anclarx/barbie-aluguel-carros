@@ -1,24 +1,26 @@
 import { useState } from "react";
-import { useApp } from "../../context/AppContext";
-import { diasEntre, formatBRL, formatData } from "../../lib/format";
-import type { Pedido, TipoContrato } from "../../types";
-import { TituloModelo } from "../carros/CarCard";
-import { CarResumoCard } from "../carros/CarSpecs";
-import { rotuloStatus } from "../../lib/status";
+import { useToast } from "../../hooks/useToast";
+import { formatData } from "../../lib/format";
+import { mensagemDeErro } from "../../services/http";
+import { pedidoService } from "../../services/pedidoService";
+import { rotuloContrato } from "../../lib/contrato";
+import type { Pedido } from "../../types";
+import { CarResumoCard, TituloModelo } from "../carros/CarSpecs";
+import { StatusBadge } from "../ui/Badge";
 import { Button } from "../ui/Button";
-import { Checkbox, DateField } from "../ui/Field";
 import { Modal } from "../ui/Modal";
 import { AndamentoPedido, ResumoPedido } from "./ResumoPedido";
 
-const rotuloContrato: Record<TipoContrato, string> = {
-  PROPRIEDADE_CLIENTE: "Propriedade do cliente",
-  PROPRIEDADE_EMPRESA: "Propriedade da empresa",
-  PROPRIEDADE_BANCO: "Propriedade do banco",
-};
-
-const contexto = (p: Pedido) => `Pedido #${p.id} · ${rotuloStatus[p.status]}`;
+/** Cabeçalho dos modais de pedido (Figma): selo de status à esquerda e o código acima do título. */
+const cabecalho = (p: Pedido) => ({
+  selo: <StatusBadge status={p.status} tamanho="md" />,
+  context: `Pedido #${p.codigo}`,
+});
 
 type ModalPedidoProps = { pedido: Pedido | null; onClose: () => void };
+
+/** Modais que alteram o pedido avisam a lista para recarregar. */
+type ModalAcaoProps = ModalPedidoProps & { onAlterado: () => void };
 
 /** Modal "Detalhes do pedido" (US04). */
 export function DetalhesPedidoModal({ pedido, onClose }: ModalPedidoProps) {
@@ -26,7 +28,7 @@ export function DetalhesPedidoModal({ pedido, onClose }: ModalPedidoProps) {
     <Modal
       open={!!pedido}
       onClose={onClose}
-      context={pedido ? contexto(pedido) : ""}
+      {...(pedido && cabecalho(pedido))}
       title="Detalhes do pedido"
       footer={
         <Button variant="secondary" onClick={onClose}>
@@ -63,7 +65,7 @@ export function DetalhesPedidoModal({ pedido, onClose }: ModalPedidoProps) {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-label-medium text-neutral-secondary">Tipo de contrato</span>
-                    <span className="text-body-medium">{rotuloContrato[pedido.tipoContrato]}</span>
+                    <span className="text-body-medium">{rotuloContrato(pedido.tipoContrato)}</span>
                   </div>
                 </div>
               </section>
@@ -85,101 +87,45 @@ export function DetalhesPedidoModal({ pedido, onClose }: ModalPedidoProps) {
   );
 }
 
-/** Modal "Editar pedido" (US05). */
-export function EditarPedidoModal({ pedido, onClose }: ModalPedidoProps) {
+/** Modal "Cancelar pedido" (US06). */
+export function CancelarPedidoModal({ pedido, onClose, onAlterado }: ModalAcaoProps) {
   if (!pedido) return null;
-  return <EditarConteudo key={pedido.id} pedido={pedido} onClose={onClose} />;
+  return <CancelarConteudo key={pedido.id} pedido={pedido} onClose={onClose} onAlterado={onAlterado} />;
 }
 
-function EditarConteudo({ pedido, onClose }: { pedido: Pedido; onClose: () => void }) {
-  const { editarPedido } = useApp();
-  const [dataRetirada, setDataRetirada] = useState(pedido.dataRetirada);
-  const [dataEntrega, setDataEntrega] = useState(pedido.dataEntrega);
-  const [comCredito, setComCredito] = useState(pedido.comCredito);
+function CancelarConteudo({ pedido, onClose, onAlterado }: ModalAcaoProps & { pedido: Pedido }) {
+  const toast = useToast();
   const [erro, setErro] = useState("");
+  const [enviando, setEnviando] = useState(false);
 
-  const salvar = () => {
-    if (diasEntre(dataRetirada, dataEntrega) < 1) return setErro("A entrega precisa ser depois da retirada.");
-    editarPedido(pedido.id, { dataRetirada, dataEntrega, comCredito });
-    onClose();
+  const confirmar = async () => {
+    setEnviando(true);
+    try {
+      await pedidoService.cancelar(pedido.id);
+      onAlterado();
+      onClose();
+      toast.sucesso("Pedido cancelado", `O pedido #${pedido.codigo} do ${pedido.modelo.nome} foi cancelado.`);
+    } catch (e) {
+      setErro(mensagemDeErro(e));
+      toast.erro("Não foi possível cancelar", mensagemDeErro(e));
+      setEnviando(false);
+    }
   };
 
   return (
     <Modal
       open
       onClose={onClose}
-      width="md"
-      context={contexto(pedido)}
-      title="Editar pedido"
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button onClick={salvar}>Salvar alterações</Button>
-        </>
-      }
-    >
-      <div className="flex flex-col gap-16">
-        <section className="flex flex-col gap-8">
-          <h3 className="text-body-medium">Período e forma de liquidação</h3>
-          <div className="grid grid-cols-2 gap-12">
-            <DateField label="Data de retirada" value={dataRetirada} onChange={(e) => setDataRetirada(e.target.value)} />
-            <DateField label="Data de entrega" value={dataEntrega} min={dataRetirada} onChange={(e) => setDataEntrega(e.target.value)} />
-          </div>
-          <span className="text-body-medium text-neutral-secondary">Contrato com crédito bancário</span>
-          <Checkbox checked={comCredito} onChange={(e) => setComCredito(e.target.checked)}>
-            <span className="text-body-medium">Associe o aluguel a um financiamento. O banco analisa seus rendimentos.</span>
-          </Checkbox>
-          {pedido.status === "APROVADO" && (
-            <p className="text-label-medium text-status-warning-text">
-              Ao salvar, o pedido aprovado volta para análise financeira.
-            </p>
-          )}
-          {erro && <p className="text-label-medium text-status-danger-text">{erro}</p>}
-        </section>
-        <section className="flex flex-col gap-8">
-          <h3 className="text-body-medium">Resumo atualizado</h3>
-          <div className="grid grid-cols-[1fr_160px] gap-12">
-            <ResumoPedido
-              diaria={pedido.modelo.diaria}
-              dataRetirada={dataRetirada}
-              dataEntrega={dataEntrega}
-              comCredito={comCredito}
-            />
-            <div className="flex flex-col justify-center gap-8 rounded-lg border border-neutral-border p-12">
-              <img src={pedido.modelo.imagemUrl} alt={pedido.modelo.nome} className="h-90 w-full object-contain" />
-              <TituloModelo modelo={pedido.modelo} />
-            </div>
-          </div>
-        </section>
-      </div>
-    </Modal>
-  );
-}
-
-/** Modal "Cancelar pedido" (US06). */
-export function CancelarPedidoModal({ pedido, onClose }: ModalPedidoProps) {
-  const { cancelarPedido } = useApp();
-  return (
-    <Modal
-      open={!!pedido}
-      onClose={onClose}
       width="sm"
-      context={pedido ? contexto(pedido) : ""}
+      {...cabecalho(pedido)}
       title="Cancelar pedido"
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>
             Voltar
           </Button>
-          <Button
-            onClick={() => {
-              if (pedido) cancelarPedido(pedido.id);
-              onClose();
-            }}
-          >
-            Sim, cancelar pedido
+          <Button onClick={confirmar} disabled={enviando}>
+            {enviando ? "Cancelando…" : "Sim, cancelar pedido"}
           </Button>
         </>
       }
@@ -190,19 +136,12 @@ export function CancelarPedidoModal({ pedido, onClose }: ModalPedidoProps) {
           <div className="flex items-center gap-16 rounded-lg border border-neutral-border p-12">
             <img src={pedido.modelo.imagemUrl} alt="" className="h-60 w-90 object-contain" />
             <TituloModelo modelo={pedido.modelo} className="flex-1" />
-            <div className="flex flex-col">
-              <span className="text-label-medium text-neutral-secondary">Placa</span>
-              <span className="text-body-medium">{pedido.automovel?.placa ?? "—"}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-label-medium text-neutral-secondary">Diária</span>
-              <span className="text-body-medium">{formatBRL(pedido.modelo.diaria)}</span>
-            </div>
           </div>
           <p className="text-body-medium text-justify">
             Ao cancelar, o pedido sai da análise e não poderá ser retomado. Você pode fazer uma nova solicitação quando
             quiser.
           </p>
+          {erro && <p className="text-label-medium text-status-danger-text">{erro}</p>}
         </div>
       )}
     </Modal>

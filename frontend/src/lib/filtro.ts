@@ -2,6 +2,7 @@ import type { Modelo } from "../types";
 
 export type FiltroState = {
   marcas: string[];
+  carrocerias: string[];
   cambios: string[];
   combustiveis: string[];
   assentos: number[];
@@ -12,6 +13,7 @@ export type FiltroState = {
 
 export const filtroVazio: FiltroState = {
   marcas: [],
+  carrocerias: [],
   cambios: [],
   combustiveis: [],
   assentos: [],
@@ -25,6 +27,7 @@ export function aplicarFiltro(modelos: Modelo[], f: FiltroState) {
   return modelos.filter(
     (m) =>
       (!f.marcas.length || f.marcas.includes(m.marca)) &&
+      (!f.carrocerias.length || f.carrocerias.includes(m.carroceria)) &&
       (!f.cambios.length || f.cambios.some((c) => m.cambio.toLowerCase().includes(c.toLowerCase()))) &&
       (!f.combustiveis.length || f.combustiveis.some((c) => m.combustivel.startsWith(c))) &&
       (!f.assentos.length || f.assentos.includes(m.assentos)) &&

@@ -1,5 +1,6 @@
-import { tiposRendimento } from "../../data/mock";
+import { useTiposRendimento } from "../../hooks/useCatalogo";
 import { formatBRL } from "../../lib/format";
+import { valorDaMascaraMoeda } from "../../lib/mascaras";
 import { MAX_RENDIMENTOS, novoRendimento, rendaTotal } from "../../lib/rendimentos";
 import type { Rendimento, TipoRendimento } from "../../types";
 import { Tag } from "../ui/Badge";
@@ -11,20 +12,21 @@ type Props = { rendimentos: Rendimento[]; onChange: (rendimentos: Rendimento[]) 
 
 /** Lista de 1 a 3 rendimentos com campos por categoria e renda mensal total. */
 export function RendimentosEditor({ rendimentos, onChange }: Props) {
+  const tipos = useTiposRendimento().dados ?? [];
   const atualizar = (id: number, parcial: Partial<Rendimento>) =>
     onChange(rendimentos.map((r) => (r.id === id ? { ...r, ...parcial } : r)));
 
   return (
     <div className="flex flex-col gap-16">
       {rendimentos.map((r, i) => {
-        const campoExtra = tiposRendimento.find((t) => t.value === r.tipo)?.campo;
+        const campoExtra = tipos.find((t) => t.value === r.tipo)?.campo;
         const valor = (
           <TextField
             label="Valor mensal"
-            inputMode="decimal"
+            inputMode="numeric"
             placeholder="R$0,00"
-            value={r.valorMensal ? String(r.valorMensal) : ""}
-            onChange={(e) => atualizar(r.id, { valorMensal: Number(e.target.value.replace(/\D/g, "")) })}
+            value={r.valorMensal ? formatBRL(r.valorMensal) : ""}
+            onChange={(e) => atualizar(r.id, { valorMensal: valorDaMascaraMoeda(e.target.value) })}
           />
         );
         return (
@@ -47,14 +49,14 @@ export function RendimentosEditor({ rendimentos, onChange }: Props) {
               placeholder="Escolha um rendimento"
               value={r.tipo}
               onChange={(e) => atualizar(r.id, { tipo: e.target.value as TipoRendimento })}
-              options={tiposRendimento}
+              options={tipos}
             />
             {campoExtra ? (
               <div className="grid grid-cols-2 gap-12">
                 <TextField
                   label={campoExtra}
                   placeholder={campoExtra === "Nome empresa" ? "Nome da empresa" : campoExtra}
-                  value={r.entidadeEmpregadora}
+                  value={r.entidadeEmpregadora ?? ""}
                   onChange={(e) => atualizar(r.id, { entidadeEmpregadora: e.target.value })}
                 />
                 {valor}

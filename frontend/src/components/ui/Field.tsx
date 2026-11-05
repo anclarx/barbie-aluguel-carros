@@ -1,9 +1,9 @@
 import { useId, useState, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from "react";
 import { cn } from "../../lib/cn";
-import { Icon } from "./Icon";
+import { Icon, type IconName } from "./Icon";
 
 const caixa =
-  "h-46 w-full rounded-md border border-neutral-border bg-neutral-white px-16 text-body-medium text-neutral-text placeholder:text-neutral-text outline-none focus:border-brand-primary";
+  "h-46 w-full rounded-md border border-neutral-border bg-neutral-white px-16 text-body-medium text-neutral-text placeholder:text-neutral-secondary outline-none focus:border-brand-primary";
 
 type LabelProps = { label?: string; htmlFor: string; error?: string; className?: string; children: ReactNode };
 
@@ -90,15 +90,21 @@ type SelectFieldProps = SelectHTMLAttributes<HTMLSelectElement> & {
   error?: string;
   placeholder?: string;
   options: Array<{ value: string; label: string }>;
+  /** Ícone à esquerda do valor, como o de localização nas lojas. */
+  icon?: IconName;
 };
 
-export function SelectField({ label, error, className, id, placeholder, options, ...props }: SelectFieldProps) {
+export function SelectField({ label, error, className, id, placeholder, options, icon, ...props }: SelectFieldProps) {
   const autoId = useId();
   const inputId = id ?? autoId;
   return (
     <Campo label={label} htmlFor={inputId} error={error} className={className}>
       <div className="relative">
-        <select id={inputId} className={cn(caixa, "appearance-none pr-48", error && "border-status-danger-text")} {...props}>
+        <select
+          id={inputId}
+          className={cn(caixa, "appearance-none truncate pr-48", icon && "pl-48", error && "border-status-danger-text")}
+          {...props}
+        >
           {placeholder && (
             <option value="" disabled>
               {placeholder}
@@ -110,6 +116,14 @@ export function SelectField({ label, error, className, id, placeholder, options,
             </option>
           ))}
         </select>
+        {/* Depois do select para ficar por cima do fundo branco dele. */}
+        {icon && (
+          <Icon
+            name={icon}
+            size={20}
+            className="pointer-events-none absolute top-1/2 left-16 -translate-y-1/2 text-neutral-text"
+          />
+        )}
         <Icon
           name="seta"
           rotate={180}

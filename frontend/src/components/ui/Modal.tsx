@@ -1,7 +1,8 @@
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useModalAberto } from "../../hooks/useModalAberto";
 import { cn } from "../../lib/cn";
-import { Icon } from "./Icon";
+import { CabecalhoModal } from "./CabecalhoModal";
 
 type Largura = "sm" | "md" | "lg";
 
@@ -16,29 +17,22 @@ type ModalProps = {
   onClose: () => void;
   /** Linha pequena acima do título (ex.: "Novo pedido · Etapa 1 de 2"). */
   context?: string;
+  /** Selo à esquerda do título (ex.: status do pedido). */
+  selo?: ReactNode;
   title: string;
   width?: Largura;
   footer?: ReactNode;
   children: ReactNode;
 };
 
-export function Modal({ open, onClose, context, title, width = "lg", footer, children }: ModalProps) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [open, onClose]);
+export function Modal({ open, onClose, context, selo, title, width = "lg", footer, children }: ModalProps) {
+  useModalAberto(open, onClose);
 
   if (!open) return null;
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-backdrop p-16 backdrop-blur-[6px]"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-backdrop p-16"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
@@ -50,15 +44,7 @@ export function Modal({ open, onClose, context, title, width = "lg", footer, chi
           larguras[width],
         )}
       >
-        <header className="flex h-60 shrink-0 items-center justify-between border-b border-neutral-border px-16">
-          <div className="flex flex-col">
-            {context && <span className="text-caption-medium text-neutral-secondary">{context}</span>}
-            <h2 className="text-body-bold">{title}</h2>
-          </div>
-          <button type="button" onClick={onClose} aria-label="Fechar" className="text-brand-primary">
-            <Icon name="fechar" size={24} />
-          </button>
-        </header>
+        <CabecalhoModal title={title} contexto={context} selo={selo} onClose={onClose} />
         <div className="min-h-0 flex-1 overflow-y-auto p-16">{children}</div>
         {footer && (
           <footer className="flex h-63 shrink-0 items-center justify-end gap-12 border-t border-neutral-border px-16">

@@ -18,3 +18,22 @@ export function diasEntre(inicio: string, fim: string) {
   const ms = new Date(fim).getTime() - new Date(inicio).getTime();
   return Math.max(0, Math.round(ms / 86_400_000));
 }
+
+/** Data no fuso local como ISO ("2027-01-13"). `toISOString` usa UTC e adiantaria o dia à noite. */
+const isoLocal = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/** "2027-01-12" + 1 → "2027-01-13" */
+export function somarDias(iso: string, dias: number) {
+  const [ano, mes, dia] = iso.split("-").map(Number);
+  return isoLocal(new Date(ano, mes - 1, dia + dias));
+}
+
+/** Primeiro dia aceito para retirada: amanhã. Quem entra no dia 12 retira a partir do dia 13. */
+export function primeiraRetirada() {
+  const hoje = new Date();
+  return isoLocal(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1));
+}
+
+/** A devolução é pelo menos um dia depois da retirada. */
+export const primeiraDevolucao = (retirada: string) => somarDias(retirada || primeiraRetirada(), 1);

@@ -1,153 +1,133 @@
 import { useState } from "react";
-import { useApp } from "../../context/AppContext";
-import { modelos } from "../../data/mock";
-import { diasEntre } from "../../lib/format";
-import type { Modelo } from "../../types";
-import { CarOption } from "../carros/CarCard";
-import { CarResumoCard } from "../carros/CarSpecs";
+import { useNavigate } from "react-router";
+import { useAuth } from "../../hooks/useAuth";
+import { useFormularioPedido, type ValoresPedido } from "../../hooks/useFormularioPedido";
+import { useToast } from "../../hooks/useToast";
+import { guardarPedidoPendente } from "../../lib/pedidoPendente";
+import { mensagemDeErro } from "../../services/http";
+import { pedidoService } from "../../services/pedidoService";
+import type { Modelo, Pedido } from "../../types";
+import type { Busca } from "../carros/BuscaAluguel";
 import { Button } from "../ui/Button";
-import { Checkbox, DateField } from "../ui/Field";
-import { Modal } from "../ui/Modal";
-import { ResumoPedido } from "./ResumoPedido";
+import { ModalDuasColunas } from "../ui/ModalDuasColunas";
+import { ResumoAluguel } from "./ResumoAluguel";
+import { SecaoLiquidacao, SecaoLocalPeriodo, SecaoModelo } from "./SecoesPedido";
 
 type Props = {
-  open: boolean;
-  /** Modelo já escolhido (ex.: "Alugar" na vitrine) abre direto na etapa 2. */
-  modeloInicial?: Modelo | null;
+  /** Carro escolhido no "Alugar" da vitrine; sem ele o modal fica fechado. */
+  modelo: Modelo | null;
+  /** Lojas e datas já escolhidas na busca da Início. */
+  busca?: Busca | null;
+  /** Escolhas de antes do login, quando o pedido foi começado sem conta; valem mais que a busca. */
+  inicial?: ValoresPedido | null;
   onClose: () => void;
-  onDetalhes: (modelo: Modelo) => void;
-  onCriado: () => void;
+  onCriado: (pedido: Pedido) => void;
 };
 
-/** Modal "Novo pedido" em 2 etapas (US03). */
-export function NovoPedidoModal({ open, modeloInicial, onClose, onDetalhes, onCriado }: Props) {
-  if (!open) return null;
+/** Modal "Novo pedido · Período e forma de liquidação" (US03). */
+export function NovoPedidoModal({ modelo, busca, inicial, onClose, onCriado }: Props) {
+  if (!modelo) return null;
   return (
     <Conteudo
-      key={modeloInicial?.id ?? "novo"}
-      modeloInicial={modeloInicial ?? null}
+      key={modelo.id}
+      modelo={modelo}
+      busca={busca ?? null}
+      inicial={inicial ?? null}
       onClose={onClose}
-      onDetalhes={onDetalhes}
       onCriado={onCriado}
     />
   );
 }
 
-function Conteudo({ modeloInicial, onClose, onDetalhes, onCriado }: Omit<Props, "open"> & { modeloInicial: Modelo | null }) {
-  const { automovelLivre, criarPedido } = useApp();
-  const [etapa, setEtapa] = useState<1 | 2>(modeloInicial ? 2 : 1);
-  const [modelo, setModelo] = useState<Modelo | null>(modeloInicial);
-  const [dataRetirada, setDataRetirada] = useState("");
-  const [dataEntrega, setDataEntrega] = useState("");
-  const [comCredito, setComCredito] = useState(false);
+type ConteudoProps = Pick<Props, "onClose" | "onCriado"> & {
+  modelo: Modelo;
+  busca: Busca | null;
+  inicial: ValoresPedido | null;
+};
+
+function Conteudo({ modelo, busca, inicial, onClose, onCriado }: ConteudoProps) {
+  const toast = useToast();
+  const { cliente } = useAuth();
+  const navigate = useNavigate();
+  const form = useFormularioPedido(modelo, inicial ?? {
+    localRetiradaId: busca ? String(busca.localRetiradaId) : "",
+    localDevolucaoId: busca ? String(busca.localDevolucaoId) : "",
+    dataRetirada: busca?.dataRetirada ?? "",
+    dataEntrega: busca?.dataDevolucao ?? "",
+    comCredito: false,
+    escolhas: {},
+  });
   const [erro, setErro] = useState("");
+  const [enviando, setEnviando] = useState(false);
 
-  const automovel = modelo ? automovelLivre(modelo.id) : undefined;
-
-  const enviar = () => {
-    if (!modelo) return;
-    if (!dataRetirada || !dataEntrega) return setErro("Informe as datas de retirada e entrega.");
-    if (diasEntre(dataRetirada, dataEntrega) < 1) return setErro("A entrega precisa ser depois da retirada.");
-    if (!automovel) return setErro("Não há automóvel livre deste modelo no momento.");
-    criarPedido({ modelo, dataRetirada, dataEntrega, comCredito });
-    onCriado();
+  /** Sem conta, o pedido fica guardado e a pessoa entra ou se cadastra; depois a Início reabre este modal. */
+  const irParaConta = (destino: "/login" | "/cadastro") => {
+    guardarPedidoPendente({ modelo, valores: form.valores });
+    navigate(destino, { state: { from: "/" } });
   };
 
-  if (etapa === 1) {
-    return (
-      <Modal
-        open
-        onClose={onClose}
-        context="Novo pedido · Etapa 1 de 2"
-        title="Escolha o automóvel"
-        footer={
-          <>
-            <Button variant="secondary" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button disabled={!modelo} onClick={() => setEtapa(2)}>
-              Continuar
-            </Button>
-          </>
-        }
-      >
-        <div role="radiogroup" aria-label="Automóveis" className="grid grid-cols-4 gap-12">
-          {modelos.map((m) => (
-            <CarOption
-              key={m.id}
-              modelo={m}
-              selecionado={modelo?.id === m.id}
-              onSelect={() => setModelo(m)}
-              onDetalhes={() => onDetalhes(m)}
-            />
-          ))}
-        </div>
-      </Modal>
-    );
-  }
+  const enviar = async () => {
+    const invalido = form.validar();
+    if (invalido) {
+      setErro(invalido);
+      return toast.erro("Confira o pedido", invalido);
+    }
+    const { valores } = form;
+    setEnviando(true);
+    try {
+      const pedido = await pedidoService.criar({
+        modeloId: modelo.id,
+        localRetiradaId: Number(valores.localRetiradaId),
+        localDevolucaoId: Number(valores.localDevolucaoId),
+        dataRetirada: valores.dataRetirada,
+        dataEntrega: valores.dataEntrega,
+        comCredito: valores.comCredito,
+        propostas: form.propostas,
+      });
+      onCriado(pedido);
+    } catch (e) {
+      setErro(mensagemDeErro(e));
+      toast.erro("Não foi possível enviar o pedido", mensagemDeErro(e));
+      setEnviando(false);
+    }
+  };
 
   return (
-    <Modal
+    <ModalDuasColunas
       open
       onClose={onClose}
-      context="Novo pedido · Etapa 2 de 2"
-      title="Período e confirmação"
-      footer={
-        <>
-          <Button variant="secondary" onClick={() => setEtapa(1)}>
-            Voltar
-          </Button>
-          <Button onClick={enviar}>Enviar pedido para análise</Button>
-        </>
+      contexto="Novo pedido"
+      title="Período e forma de liquidação"
+      aside={
+        <ResumoAluguel titulo="Resumo do pedido de aluguel" modelo={modelo} form={form}>
+          {cliente ? (
+            <Button fullWidth onClick={enviar} disabled={enviando}>
+              {enviando ? "Enviando…" : "Enviar pedido para análise"}
+            </Button>
+          ) : (
+            <>
+              <p className="text-label-medium text-neutral-secondary">
+                Para enviar o pedido, entre na sua conta. O que você escolheu aqui fica guardado.
+              </p>
+              <Button fullWidth onClick={() => irParaConta("/login")}>
+                Entrar para enviar o pedido
+              </Button>
+              <Button fullWidth variant="secondary" onClick={() => irParaConta("/cadastro")}>
+                Criar conta
+              </Button>
+            </>
+          )}
+          {erro && <p className="text-label-medium text-status-danger-text">{erro}</p>}
+        </ResumoAluguel>
       }
     >
-      {modelo && (
-        <div className="grid grid-cols-2 gap-24">
-          <div className="flex flex-col gap-24">
-            <section className="flex flex-col gap-8">
-              <h3 className="text-body-medium">Modelo do automóvel escolhido</h3>
-              <CarResumoCard modelo={modelo} />
-            </section>
-            <section className="flex flex-col gap-8">
-              <h3 className="text-body-medium">Detalhes do automóvel reservado</h3>
-              <div className="flex flex-col rounded-lg border border-neutral-border p-16">
-                <span className="text-label-medium text-neutral-secondary">Placa</span>
-                <span className="text-body-medium">{automovel?.placa ?? "Sem automóvel disponível"}</span>
-              </div>
-            </section>
-          </div>
-
-          <div className="flex flex-col gap-24">
-            <section className="flex flex-col gap-8">
-              <h3 className="text-body-medium">Período e forma de liquidação</h3>
-              <div className="grid grid-cols-2 gap-12">
-                <DateField label="Data de retirada" value={dataRetirada} onChange={(e) => setDataRetirada(e.target.value)} />
-                <DateField
-                  label="Data de entrega"
-                  value={dataEntrega}
-                  min={dataRetirada || undefined}
-                  onChange={(e) => setDataEntrega(e.target.value)}
-                />
-              </div>
-              <span className="text-body-medium text-neutral-secondary">Contrato com crédito bancário</span>
-              <Checkbox checked={comCredito} onChange={(e) => setComCredito(e.target.checked)}>
-                <span className="text-body-medium">Associe o aluguel a um financiamento. O banco analisa seus rendimentos.</span>
-              </Checkbox>
-              {erro && <p className="text-label-medium text-status-danger-text">{erro}</p>}
-            </section>
-            <section className="flex flex-col gap-8">
-              <h3 className="text-body-medium">Resumo do pedido de aluguel</h3>
-              <ResumoPedido
-                modelo={modelo}
-                diaria={modelo.diaria}
-                dataRetirada={dataRetirada}
-                dataEntrega={dataEntrega}
-                comCredito={comCredito}
-              />
-            </section>
-          </div>
-        </div>
-      )}
-    </Modal>
+      <SecaoModelo modelo={modelo} />
+      <SecaoLocalPeriodo form={form} />
+      <SecaoLiquidacao
+        form={form}
+        dica="Escolha um ou mais bancos para comparar as condições de financiamento."
+        aviso="Sujeito à análise de crédito. As condições podem variar de acordo com o seu perfil."
+      />
+    </ModalDuasColunas>
   );
 }

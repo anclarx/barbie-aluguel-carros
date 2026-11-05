@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactNode, Ref } from "react";
 import { cn } from "../../lib/cn";
 
 type Variant = "primary" | "secondary" | "danger" | "link";
@@ -20,6 +20,7 @@ const sizes: Record<Size, string> = {
 };
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  ref?: Ref<HTMLButtonElement>;
   variant?: Variant;
   size?: Size;
   icon?: ReactNode;
