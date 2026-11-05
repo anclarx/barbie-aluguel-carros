@@ -1,0 +1,54 @@
+{
+  "agentes": [
+    { "nome": "Nome do Agente", "email": "agente2@pinkgo.dev", "senha": "troque123" }
+  ],
+  "clientes": [
+    {
+      "nome": "Nome do Cliente",
+      "email": "cliente2@pinkgo.dev",
+      "senha": "troque123",
+      "cpf": "111.444.777-35",
+      "rg": "MG-12.345.678",
+      "endereco": "Rua Exemplo, 100, Belo Horizonte - MG",
+      "profissao": "Profissão",
+      "rendimentos": [
+        { "tipo": "EMPREGO_CLT_PUBLICO", "entidadeEmpregadora": "Empresa", "valorMensal": 6000.00 },
+        { "tipo": "INVESTIMENTO", "valorMensal": 800.00 }
+      ],
+      "pedidos": [
+        {
+          "modelo": "Sweet 57",
+          "lojaRetirada": "Pinheiros",
+          "retirada": "2025-03-10",
+          "entrega": "2025-03-15",
+          "solicitadoEm": "2025-03-01",
+          "status": "CONTRATO_ENCERRADO",
+          "tipoContrato": "PROPRIEDADE_EMPRESA",
+          "justificativa": "Renda compatível."
+        },
+        {
+          "modelo": "Pegasus Cabrio",
+          "lojaRetirada": "Savassi",
+          "lojaDevolucao": "Pinheiros",
+          "retirada": "2026-12-20",
+          "entrega": "2026-12-28",
+          "credito": {
+            "propostas": [
+              { "banco": "Banco Aurora", "parcelas": 18, "aprovada": true },
+              { "banco": "Banco Brilho", "parcelas": 12, "aprovada": false, "motivo": "Parcela acima de 40% da renda." }
+            ],
+            "bancoEscolhido": "Banco Aurora"
+          }
+        },
+        {
+          "modelo": "Baby Beetle",
+          "lojaRetirada": "Savassi",
+          "retirada": "2026-02-01",
+          "entrega": "2026-02-05",
+          "solicitadoEm": "2026-01-20",
+          "status": "CANCELADO"
+        }
+      ]
+    }
+  ]
+}

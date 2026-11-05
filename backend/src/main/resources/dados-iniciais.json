@@ -1,0 +1,403 @@
+{
+  "agentes": [],
+  "clientes": [
+    {
+      "nome": "Helena Montenegro",
+      "email": "helenamontenegro@gmail.com",
+      "senha": "montenegro@helena27",
+      "cpf": "853.544.540-42",
+      "rg": "50.319.835-3",
+      "endereco": "Rua Cândido de Souza, 710, Gameleira, Belo Horizonte/MG",
+      "profissao": "Arquiteta",
+      "rendimentos": [
+        {
+          "tipo": "EMPREGO_CLT_PUBLICO",
+          "entidadeEmpregadora": "Montenegro & Lins Arquitetura",
+          "valorMensal": 9800
+        },
+        {
+          "tipo": "ALUGUEL",
+          "entidadeEmpregadora": "Apartamento na Pampulha",
+          "valorMensal": 1600
+        }
+      ],
+      "pedidos": [
+        {
+          "modelo": "Baby Beetle",
+          "lojaRetirada": "Savassi",
+          "retirada": "2025-01-10",
+          "entrega": "2025-01-17",
+          "solicitadoEm": "2024-12-28",
+          "status": "CONTRATO_ENCERRADO",
+          "tipoContrato": "PROPRIEDADE_EMPRESA",
+          "justificativa": "Aluguel curto, bem abaixo da regra interna de renda."
+        },
+        {
+          "modelo": "Pegasus Cabrio",
+          "lojaRetirada": "Savassi",
+          "retirada": "2025-03-01",
+          "entrega": "2025-03-05",
+          "solicitadoEm": "2025-02-15",
+          "status": "CANCELADO"
+        },
+        {
+          "modelo": "Bel-Star Cruiser",
+          "lojaRetirada": "Savassi",
+          "retirada": "2025-04-18",
+          "entrega": "2025-04-21",
+          "solicitadoEm": "2025-04-02",
+          "status": "CONTRATO_ENCERRADO",
+          "tipoContrato": "PROPRIEDADE_EMPRESA",
+          "justificativa": "Feriado prolongado; total compatível com a renda."
+        },
+        {
+          "modelo": "Speedster Z",
+          "lojaRetirada": "Savassi",
+          "retirada": "2025-06-02",
+          "entrega": "2025-06-30",
+          "solicitadoEm": "2025-05-20",
+          "status": "NEGADO",
+          "justificativa": "O total de 28 dias passaria da metade da renda mensal. Sugerimos um período menor."
+        },
+        {
+          "modelo": "Pegasus Cabrio",
+          "lojaRetirada": "Savassi",
+          "retirada": "2025-07-10",
+          "entrega": "2025-07-25",
+          "solicitadoEm": "2025-06-25",
+          "status": "CONTRATO_ENCERRADO",
+          "lojaDevolucao": "Pinheiros",
+          "tipoContrato": "PROPRIEDADE_BANCO",
+          "justificativa": "Financiamento aprovado; parcela confortável.",
+          "credito": {
+            "propostas": [
+              {
+                "banco": "Banco Aurora",
+                "parcelas": 18
+              },
+              {
+                "banco": "Banco Brilho",
+                "parcelas": 12
+              }
+            ],
+            "bancoEscolhido": "Banco Aurora"
+          }
+        },
+        {
+          "modelo": "Sunset GT",
+          "lojaRetirada": "Pinheiros",
+          "retirada": "2025-09-05",
+          "entrega": "2025-09-09",
+          "solicitadoEm": "2025-08-22",
+          "status": "CONTRATO_ENCERRADO",
+          "tipoContrato": "PROPRIEDADE_EMPRESA",
+          "justificativa": "Viagem a São Paulo; cliente com histórico positivo."
+        },
+        {
+          "modelo": "Lilac Spyder",
+          "lojaRetirada": "Savassi",
+          "retirada": "2026-10-28",
+          "entrega": "2026-11-10",
+          "solicitadoEm": "2026-10-15",
+          "status": "CONTRATO_EM_EXECUCAO",
+          "tipoContrato": "PROPRIEDADE_EMPRESA",
+          "justificativa": "Cliente recorrente, sem pendências."
+        },
+        {
+          "modelo": "Bloom Mini",
+          "lojaRetirada": "Savassi",
+          "retirada": "2026-12-18",
+          "entrega": "2027-01-08",
+          "solicitadoEm": "2026-10-30",
+          "status": "APROVADO",
+          "tipoContrato": "PROPRIEDADE_BANCO",
+          "justificativa": "Fim de ano parcelado pelo banco escolhido.",
+          "credito": {
+            "propostas": [
+              {
+                "banco": "Banco Celeste",
+                "parcelas": 6
+              },
+              {
+                "banco": "Banco Brilho",
+                "parcelas": 6
+              }
+            ],
+            "bancoEscolhido": "Banco Celeste"
+          }
+        },
+        {
+          "modelo": "Aurora Roadster",
+          "lojaRetirada": "Pinheiros",
+          "retirada": "2027-02-10",
+          "entrega": "2027-02-20",
+          "solicitadoEm": "2026-11-02",
+          "status": "EM_ANALISE_FINANCEIRA",
+          "credito": {
+            "propostas": [
+              {
+                "banco": "Banco Aurora",
+                "parcelas": 18
+              },
+              {
+                "banco": "Banco Celeste",
+                "parcelas": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "nome": "Álvaro Bittencourt",
+      "email": "alvarobittencourt@gmail.com",
+      "senha": "bitt3ncourt09",
+      "cpf": "914.441.140-50",
+      "rg": "44.262.630-7",
+      "endereco": "Rua José Bonifácio, 200, Sé, São Paulo/SP",
+      "profissao": "Advogado",
+      "rendimentos": [
+        {
+          "tipo": "PJ_MEI",
+          "entidadeEmpregadora": "Bittencourt Advocacia",
+          "valorMensal": 14500
+        },
+        {
+          "tipo": "INVESTIMENTO",
+          "valorMensal": 2500
+        }
+      ],
+      "pedidos": [
+        {
+          "modelo": "Grand Vista",
+          "lojaRetirada": "Pinheiros",
+          "retirada": "2025-05-02",
+          "entrega": "2025-05-12",
+          "solicitadoEm": "2025-04-20",
+          "status": "CONTRATO_ENCERRADO",
+          "tipoContrato": "PROPRIEDADE_EMPRESA",
+          "justificativa": "Renda alta e estável."
+        },
+        {
+          "modelo": "Sweet 57",
+          "lojaRetirada": "Pinheiros",
+          "retirada": "2025-08-14",
+          "entrega": "2025-08-17",
+          "solicitadoEm": "2025-08-01",
+          "status": "CANCELADO"
+        },
+        {
+          "modelo": "Petal Sport",
+          "lojaRetirada": "Pinheiros",
+          "retirada": "2026-12-01",
+          "entrega": "2026-12-08",
+          "solicitadoEm": "2026-10-28",
+          "status": "APROVADO",
+          "tipoContrato": "PROPRIEDADE_CLIENTE",
+          "justificativa": "Cliente pediu o carro em nome próprio durante o contrato."
+        },
+        {
+          "modelo": "Coast 4x4",
+          "lojaRetirada": "Pinheiros",
+          "retirada": "2027-01-05",
+          "entrega": "2027-01-20",
+          "solicitadoEm": "2026-11-01",
+          "status": "EM_ANALISE_FINANCEIRA",
+          "credito": {
+            "propostas": [
+              {
+                "banco": "Banco Aurora",
+                "parcelas": 12
+              },
+              {
+                "banco": "Banco Brilho",
+                "parcelas": 12
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "nome": "Lorenzo Ribeiro",
+      "email": "rilorenzo@gmail.com",
+      "senha": "lorenzori3113",
+      "cpf": "074.953.470-23",
+      "rg": "27.199.591-9",
+      "endereco": "Avenida Getúlio Vargas, 350, Vila Nossa Senhora de Lourdes, Goiânia/GO",
+      "profissao": "Professor",
+      "rendimentos": [
+        {
+          "tipo": "EMPREGO_CLT_PUBLICO",
+          "entidadeEmpregadora": "Secretaria de Educação de Goiás",
+          "valorMensal": 4200
+        },
+        {
+          "tipo": "AUTONOMO",
+          "entidadeEmpregadora": "Aulas particulares",
+          "valorMensal": 900
+        }
+      ],
+      "pedidos": [
+        {
+          "modelo": "Ranch Pickup",
+          "lojaRetirada": "Setor Bueno",
+          "retirada": "2025-11-07",
+          "entrega": "2025-11-10",
+          "solicitadoEm": "2025-10-25",
+          "status": "CONTRATO_ENCERRADO",
+          "tipoContrato": "PROPRIEDADE_EMPRESA",
+          "justificativa": "Fim de semana; valor baixo para a renda."
+        },
+        {
+          "modelo": "Pegasus Cabrio",
+          "lojaRetirada": "Setor Bueno",
+          "retirada": "2026-03-02",
+          "entrega": "2026-03-22",
+          "solicitadoEm": "2026-02-10",
+          "status": "NEGADO",
+          "justificativa": "Nenhum banco aprovou e o total passaria da renda mensal.",
+          "credito": {
+            "propostas": [
+              {
+                "banco": "Banco Aurora",
+                "parcelas": 18
+              },
+              {
+                "banco": "Banco Celeste",
+                "parcelas": 12
+              }
+            ]
+          }
+        },
+        {
+          "modelo": "Baby Beetle",
+          "lojaRetirada": "Setor Bueno",
+          "retirada": "2026-12-10",
+          "entrega": "2026-12-15",
+          "solicitadoEm": "2026-11-03",
+          "status": "EM_ANALISE_FINANCEIRA"
+        }
+      ]
+    },
+    {
+      "nome": "Cordelia Barbieri",
+      "email": "cordeliabarbieri@gmail.com",
+      "senha": "barbieri_0505cordelia",
+      "cpf": "555.113.150-52",
+      "rg": "21.264.795-7",
+      "endereco": "Rua Monsenhor Tabosa, 500, Centro, Fortaleza/CE",
+      "profissao": "Médica veterinária",
+      "rendimentos": [
+        {
+          "tipo": "AUTONOMO",
+          "entidadeEmpregadora": "Clínica Veterinária Patas do Mar",
+          "valorMensal": 6800
+        },
+        {
+          "tipo": "ALUGUEL",
+          "entidadeEmpregadora": "Sala comercial na Aldeota",
+          "valorMensal": 1200
+        }
+      ],
+      "pedidos": [
+        {
+          "modelo": "Expedition Glam",
+          "lojaRetirada": "Aldeota",
+          "retirada": "2025-12-20",
+          "entrega": "2026-01-04",
+          "solicitadoEm": "2025-12-01",
+          "status": "CONTRATO_ENCERRADO",
+          "tipoContrato": "PROPRIEDADE_EMPRESA",
+          "justificativa": "Férias de fim de ano; renda compatível."
+        },
+        {
+          "modelo": "Sunset GT",
+          "lojaRetirada": "Aldeota",
+          "retirada": "2026-02-13",
+          "entrega": "2026-02-18",
+          "solicitadoEm": "2026-01-30",
+          "status": "CANCELADO"
+        },
+        {
+          "modelo": "Aurora Roadster",
+          "lojaRetirada": "Aldeota",
+          "retirada": "2026-12-20",
+          "entrega": "2027-01-05",
+          "solicitadoEm": "2026-11-02",
+          "status": "EM_ANALISE_FINANCEIRA",
+          "credito": {
+            "propostas": [
+              {
+                "banco": "Banco Aurora",
+                "parcelas": 18
+              },
+              {
+                "banco": "Banco Brilho",
+                "parcelas": 18
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "nome": "Clarice Luísa Belmonte",
+      "email": "clarice13belmonte@gmail.com",
+      "senha": "claricebelmonte1313",
+      "cpf": "241.063.260-27",
+      "rg": "13.091.538-5",
+      "endereco": "Rua dos Timbiras, 2500, Lourdes, Belo Horizonte/MG",
+      "profissao": "Médica",
+      "rendimentos": [
+        {
+          "tipo": "EMPREGO_CLT_PUBLICO",
+          "entidadeEmpregadora": "Hospital Mater Dei",
+          "valorMensal": 12000
+        },
+        {
+          "tipo": "AUTONOMO",
+          "entidadeEmpregadora": "Clínica médica",
+          "valorMensal": 5000
+        },
+        {
+          "tipo": "INVESTIMENTO",
+          "valorMensal": 2000
+        }
+      ],
+      "pedidos": [
+        {
+          "modelo": "Bloom Mini",
+          "lojaRetirada": "Savassi",
+          "retirada": "2025-10-03",
+          "entrega": "2025-10-06",
+          "solicitadoEm": "2025-09-20",
+          "status": "CONTRATO_ENCERRADO",
+          "tipoContrato": "PROPRIEDADE_EMPRESA",
+          "justificativa": "Aluguel curto, renda muito acima do necessário."
+        },
+        {
+          "modelo": "Lilac Spyder",
+          "lojaRetirada": "Setor Bueno",
+          "retirada": "2026-11-24",
+          "entrega": "2026-12-31",
+          "solicitadoEm": "2026-11-04",
+          "status": "EM_ANALISE_FINANCEIRA",
+          "lojaDevolucao": "Savassi",
+          "credito": {
+            "propostas": [
+              {
+                "banco": "Banco Aurora",
+                "parcelas": 18
+              },
+              {
+                "banco": "Banco Celeste",
+                "parcelas": 12
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
