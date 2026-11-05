@@ -3,6 +3,7 @@ package br.pucminas.pinkgo.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -268,7 +269,11 @@ class ApiIntegrationTest {
 	@Test
 	void fotosDosCarrosVemDaApi() throws Exception {
 		mvc.perform(get("/api/modelos/2"))
-				.andExpect(jsonPath("$.imagemUrl").value("http://localhost/api/imagens/carros/sunset-gt-pink.png"));
+				.andExpect(jsonPath("$.imagemUrl").value(matchesPattern(
+						"http://localhost/api/imagens/carros/sunset-gt-pink-[0-9a-f]{32}\\.png")));
+		String url = JsonPath.read(mvc.perform(get("/api/modelos/2")).andReturn().getResponse().getContentAsString(),
+				"$.imagemUrl");
+		mvc.perform(get(url.replace("http://localhost", ""))).andExpect(status().isOk());
 		mvc.perform(get("/api/imagens/carros/sunset-gt-pink.png")).andExpect(status().isOk());
 	}
 
