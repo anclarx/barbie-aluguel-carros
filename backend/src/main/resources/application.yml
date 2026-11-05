@@ -1,0 +1,44 @@
+# Um ambiente só: o banco é o Postgres do Supabase, tanto para usar o sistema quanto para os testes.
+# Os dados de conexão vêm do backend/.env (veja .env.example), lido automaticamente abaixo.
+spring:
+  application:
+    name: pinkgo
+  # Lê o backend/.env (não versionado) se ele existir, para não precisar exportar as variáveis no terminal.
+  # Variáveis de ambiente de verdade continuam valendo mais que o arquivo.
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}
+
+pinkgo:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiracao: 8h
+  cors:
+    origens: ${CORS_ORIGENS:http://localhost:5173}
+  # Endereço do front, usado no link de "esqueci a senha".
+  front-url: ${FRONT_URL:http://localhost:5173}
+  # SMTP do e-mail de "esqueci a senha" (Gmail, Outlook, Brevo...). Sem MAIL_HOST, o link só vai para o log.
+  email:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    usuario: ${MAIL_USERNAME:}
+    senha: ${MAIL_PASSWORD:}
+    # Endereço que aparece como remetente; o padrão é a própria conta do SMTP.
+    remetente: ${MAIL_FROM:${MAIL_USERNAME:}}
+  carga:
+    # Clientes, históricos de pedidos e agentes carregados ao subir (veja "Dados iniciais" no README).
+    arquivo: ${CARGA_ARQUIVO:classpath:dados-iniciais.json}
+  bancos:
+    # Quanto os bancos "demoram" para responder uma proposta de crédito (resposta automática, veja PoliticaCredito).
+    tempo-resposta: 30s
+  enderecos:
+    # Autocomplete de endereço com dados do OpenStreetMap. A política de uso pede um User-Agent que identifique a aplicação.
+    url: ${ENDERECOS_URL:https://photon.komoot.io}
+    user-agent: ${ENDERECOS_USER_AGENT:PinkGo/0.1 (laboratorio PUC Minas)}
